@@ -1,0 +1,20 @@
+<!-- What's Missing: paste into ONE Webflow Code Embed, in a full-width section (not a Container). -->
+<div id="hotp-missing-wrap" style="width:100%;margin:0;padding:0">
+  <iframe id="hotp-missing"
+    title="What's missing from the risk map?"
+    data-src="https://yazash123.github.io/Session6-whatsmissing/"
+    allow="clipboard-write"
+    style="display:block;width:100%;height:100vh;height:100dvh;border:0;background:#fff"></iframe>
+</div>
+<script>
+(function(){
+  var f=document.getElementById('hotp-missing'), base=f.getAttribute('data-src');
+  // Cluster links: put #data, #voters, #kids, #work, #war or #check (or #supp for the
+  // supplementary risks) on the end of the Webflow page address to open that cluster.
+  function pass(){
+    var h=/^#(data|voters|kids|work|war|check|supp)$/.test(location.hash)?location.hash:'';
+    if(f.getAttribute('src')!==base+h) f.setAttribute('src',base+h);
+  }
+  pass(); window.addEventListener('hashchange',pass);
+})();
+</script>
