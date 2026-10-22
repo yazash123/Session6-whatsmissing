@@ -1231,7 +1231,7 @@ function renderTabs(){
   NAVWAS=open;
 }
 /* ---------- timings: the risks share 40 minutes; something new has 40; each is half writing, half talking ---------- */
-var RISKSEC=40*60,NEWSEC=40*60,TICK=null;
+var RISKSEC=55*60,NEWSEC=40*60,TICK=null;
 function partSec(sl){var c=C();return sl.k==='core'?Math.round(RISKSEC/(c?c.r.length:1)):NEWSEC;}
 function fmtMin(s){return s%60===0?(s/60)+' '+plain('timer.min'):plain('timer.about',{n:Math.round(s/60)});}
 function fmt(ms){var x=Math.ceil(ms/1000),m=Math.floor(x/60);x=x%60;return m+':'+(x<10?'0':'')+x;}
