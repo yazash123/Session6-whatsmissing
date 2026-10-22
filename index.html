@@ -319,10 +319,520 @@ html.editmode [data-copy]:hover{outline-style:solid;background-color:rgba(224,13
   .tabs button{font-size:14px;padding:11px 9px}
   .gobtn{font-size:16px}
 }
+
+/* ================= one dark surface, edge to edge, as on Drivers ================= */
+:root{--max:1440px;--slow:cubic-bezier(.65,0,.35,1)}
+body,body::before{background:var(--deep)}
+.mast{margin-top:12px}
+.mast .rk{display:block}
+.mast .t3{background:var(--pick);gap:12px 20px;flex-wrap:wrap;justify-content:flex-end}
+@keyframes namepulse{0%,100%{box-shadow:0 0 0 0 rgba(224,96,80,.7)}50%{box-shadow:0 0 0 12px rgba(224,96,80,0)}}
+main{padding-block:0 16px}
+#exbar{display:flex;flex-wrap:wrap;gap:6px 16px;align-items:center;background:rgba(240,224,96,.12);color:var(--ice);padding:10px 18px;font-size:15px;border-left:4px solid var(--pick)}
+#exbar[hidden]{display:none!important}
+#exbar button{border:0;background:none;color:var(--pick);font-weight:700;text-decoration:underline;text-underline-offset:3px;padding:0;font-size:15px}
+.stage{background:linear-gradient(180deg,var(--sea) 0,var(--abyss) 520px,var(--deep) 1000px)}
+.stage .gobtn{background:var(--ice);color:var(--ink);box-shadow:0 10px 30px rgba(0,0,0,.3)}
+.stage .gobtn svg{stroke:var(--ink)}
+.gobtn{transition:transform .25s var(--ease)}
+.gobtn:hover{transform:translateX(3px)}
+@keyframes stub{from{transform:scaleX(0)}to{transform:none}}
+@keyframes beat{0%,100%{box-shadow:0 0 0 4px color-mix(in srgb,var(--c) 40%,transparent)}50%{box-shadow:0 0 0 12px color-mix(in srgb,var(--c) 0%,transparent)}}
+@keyframes shake{0%,100%{transform:none}25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
+@keyframes pin{from{opacity:0;transform:translateY(6px) scale(.97)}to{opacity:1;transform:none}}
+
+/* ================= set up: which room are you in ================= */
+.ch{min-height:calc(100vh - 150px)}
+.map{min-height:calc(100vh - 150px)}
+.ch .intro{gap:16px}
+.rgrid{display:flex;flex-wrap:wrap;gap:8px;max-width:340px;margin-top:4px}
+.rb{width:44px;height:44px;border-radius:50%;border:2px solid rgba(255,255,255,.5);background:transparent;color:var(--ice);font-weight:700;font-size:15px;padding:0;transition:transform .2s var(--ease),border-color .2s,background-color .3s,color .3s}
+.rb:hover,.rb:focus-visible{border-color:var(--c);transform:scale(1.08)}
+.rb[aria-pressed="true"]{background:var(--c);border-color:var(--c);color:var(--ink)}
+.join{display:flex;flex-direction:column;gap:10px;padding:10px 0 2px;animation:fadeup .5s var(--ease) both}
+.join[hidden]{display:none!important}
+.join .jq{font-family:var(--ff-serif);font-size:clamp(24px,1rem + .7vw,30px);line-height:1.1;color:var(--ice)}
+.join .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+#joinname{flex:1 1 170px;min-width:0;border:0;background:var(--paper);color:var(--ink);padding:12px 14px;font-size:18px;font-weight:700;border-radius:4px}
+#joinname:focus{outline:3px solid var(--pick);outline-offset:2px}
+#joinname.ask{outline:3px solid #E06050;outline-offset:2px;animation:namepulse 1s ease-in-out 2}
+.join .hint{color:rgba(255,255,255,.72);font-size:15px}
+.exlink{align-self:flex-start;border:0;background:none;color:var(--sky);font-weight:700;font-size:15px;text-decoration:underline;text-underline-offset:4px;padding:2px 0}
+.map.zoom .chosen{transition:transform 1.3s var(--slow),box-shadow .6s!important}
+.map.zoom .node:not(.chosen),.map.zoom path,.map.zoom .lab{transition:opacity .6s var(--ease)!important}
+.ch .intro.zoom{transition:opacity .6s var(--ease)}
+
+/* ================= our risks: the cluster, its risks on lines, the room's work beside them ================= */
+.or{overflow-x:clip;display:grid;grid-template-columns:minmax(0,53fr) minmax(0,47fr);align-items:start;min-height:var(--H)}
+.orb{grid-column:1/-1;grid-row:1;align-self:start;position:sticky;top:calc(env(safe-area-inset-top,0px) + 46px);overflow:hidden;z-index:1}
+.lines{position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none}
+.lines .ln{fill:none;stroke:var(--c);stroke-width:2;stroke-linecap:round}
+.ohub{position:absolute;z-index:2;border-radius:50%;background:var(--c);color:var(--ink);box-shadow:0 0 0 24px color-mix(in srgb,var(--c) 13%,transparent),0 0 140px color-mix(in srgb,var(--c) 22%,transparent)}
+.ohub .hin{position:absolute;display:flex;flex-direction:column;gap:.28em}
+.ohub .eyebrow,.ob .eyebrow,.full .eyebrow{color:var(--ink)}
+.ohub .eyebrow{font-size:12px;opacity:.72}
+.ohub .hn{font-family:var(--ff-serif);font-weight:600;line-height:1.02;letter-spacing:-.01em;text-wrap:balance}
+.ohub .hk{font-weight:700;font-size:11px;letter-spacing:.14em;text-transform:uppercase;opacity:.68}
+.or.arrive .ohub .hin{animation:fade .9s var(--ease) .25s both}
+.ob{position:absolute;z-index:3;border-radius:50%;border:0;padding:0;background:var(--c);color:var(--ink);cursor:pointer;transition:box-shadow .7s var(--ease),filter .25s}
+.ob.plus{background:rgba(255,255,255,.05);color:var(--ice);outline:2px dashed rgba(255,255,255,.72);outline-offset:-2px}
+.ob:not(.big):hover{filter:brightness(1.14)}
+.ob:focus-visible{outline:3px solid var(--pick);outline-offset:4px}
+.ob .sn{position:absolute;inset:0;display:grid;place-items:center;font-weight:700;font-size:15px;transition:opacity .3s var(--ease)}
+.ob.plus .sn{font-size:22px;font-weight:400}
+.ob.big .sn{opacity:0}
+.ob.big{z-index:4;box-shadow:0 0 0 calc(var(--Rb) * .055) color-mix(in srgb,var(--c) 24%,transparent),0 0 100px color-mix(in srgb,var(--c) 30%,transparent)}
+.ob.big.plus{box-shadow:none}
+.ob.reading{z-index:5;cursor:default;background:color-mix(in srgb,var(--c) 90%,#fff);box-shadow:0 0 0 3px var(--deep),0 0 0 16px color-mix(in srgb,var(--c) 24%,transparent),0 30px 90px rgba(4,10,24,.6)}
+.ohub,.lines{transition:filter .6s var(--ease),opacity .6s var(--ease)}
+.or.reading .ohub{filter:brightness(.7) saturate(.8)}
+.or.reading .ob:not(.reading){filter:brightness(.8)}
+.or.reading .lines{opacity:.45}
+.ob .bc{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:calc(var(--Rb) * .045);padding:0 14%;text-align:center;opacity:0;pointer-events:none;transition:opacity .3s var(--ease)}
+.ob.big .bc{opacity:1;transition:opacity .7s var(--ease) .12s}
+.ob.reading .bc{opacity:0;transition:opacity .2s var(--ease)}
+.bc>*{transition:opacity .4s var(--ease)}
+.bc .eyebrow{font-size:clamp(10px,calc(var(--Rb) * .055),13px);opacity:.72}
+.bc .h{font-family:var(--ff-serif);font-weight:600;font-size:clamp(19px,calc(var(--Rb) * .13),34px);line-height:1.05;text-wrap:balance}
+.bc .fd{font-size:clamp(13px,calc(var(--Rb) * .07),17px);line-height:1.4}
+.orb.tight .bc .fd{display:none}
+.bc .rd{margin-top:4px;display:inline-flex;gap:8px;align-items:center;background:rgba(10,10,10,.12);border-radius:999px;padding:6px 12px 6px 15px;font-weight:700;font-size:12px;letter-spacing:.1em;text-transform:uppercase;transition:background-color .25s}
+.bc .rd i{font-style:normal;font-size:17px;line-height:1}
+.ob.big:hover .bc .rd{background:rgba(10,10,10,.22)}
+.bc .plusmark{font-size:calc(var(--Rb) * .3);line-height:.8;font-weight:300}
+/* reading inside the circle */
+.full{border:0;padding:0;gap:0;font-size:inherit;position:absolute;z-index:6;display:flex;flex-direction:column;opacity:0;visibility:hidden;pointer-events:none;transition:opacity .2s var(--ease),visibility 0s .2s}
+.ob.reading+.full{opacity:1;visibility:visible;pointer-events:auto;transition:opacity .55s var(--ease) .5s}
+.full .fs{flex:1;min-height:0;overflow:auto;overscroll-behavior:contain;padding:22px 8px 26px;display:flex;flex-direction:column;gap:12px;color:var(--ink);scrollbar-width:thin;
+  -webkit-mask-image:linear-gradient(180deg,transparent 0,#000 22px,#000 calc(100% - 30px),transparent);mask-image:linear-gradient(180deg,transparent 0,#000 22px,#000 calc(100% - 30px),transparent)}
+.full .fs:focus-visible{outline:2px dashed rgba(10,10,10,.45);outline-offset:-2px}
+.full .eyebrow{opacity:.7}
+.full h3{font-family:var(--ff-serif);font-weight:600;font-size:clamp(22px,1rem + .8vw,32px);line-height:1.05;text-wrap:balance}
+.full .fbody{display:flex;flex-direction:column;gap:12px;font-size:16px;line-height:1.5}
+.full .fbody blockquote{margin:0;padding-left:12px;border-left:2px solid rgba(10,10,10,.3)}
+.full .fbody ol{list-style:decimal;padding-left:20px;display:flex;flex-direction:column;gap:6px}
+.full .gospel{font-size:14px;color:rgba(10,10,10,.72)}
+.full .onward{background:var(--ink);color:var(--ice);margin-top:4px}
+.full .onward i{background:var(--c)}
+.full .onward svg{stroke:var(--ink)}
+.fx{position:absolute;top:-4px;right:-4px;width:42px;height:42px;border-radius:50%;border:0;background:var(--ink);color:var(--ice);font-size:24px;line-height:1;z-index:2;transition:transform .2s var(--ease)}
+.fx:hover{transform:scale(1.08)}
+.onward{align-self:flex-start;border:0;display:inline-flex;align-items:center;gap:12px;font-weight:700;font-size:16px;background:var(--ice);color:var(--ink);padding:9px 10px 9px 20px;border-radius:999px;transition:transform .25s var(--ease)}
+.onward:hover{transform:translateX(3px)}
+.onward i{width:28px;height:28px;border-radius:50%;background:var(--c);display:grid;place-items:center;font-style:normal}
+.onward svg{width:17px;height:17px;fill:none;stroke:var(--ink);stroke-width:2.8;stroke-linecap:round;stroke-linejoin:round}
+
+/* the workspace: no panel, just the questions on the dark */
+.ws{grid-column:2;grid-row:1;position:relative;z-index:3;padding:56px clamp(20px,3vw,52px) 120px clamp(8px,1.2vw,18px);color:var(--ice);display:flex;flex-direction:column;gap:34px;max-width:660px;
+  transition:opacity .35s var(--ease),transform .5s var(--ease);--mute:rgba(255,255,255,.74)}
+.ws.out{opacity:0;transform:translateY(10px)}
+.ws.hush{opacity:0;visibility:hidden;pointer-events:none;transition:opacity .3s var(--ease),visibility 0s .3s}
+.ws.fresh>*{animation:fadeup .75s var(--ease) both}
+.ws.fresh>*:nth-child(2){animation-delay:.14s}.ws.fresh>*:nth-child(3){animation-delay:.28s}.ws.fresh>*:nth-child(4){animation-delay:.4s}
+.wsh{display:none;flex-direction:column;gap:6px}
+.wsh .eyebrow{color:var(--sky)}
+.wsh h2{font-family:var(--ff-serif);font-weight:600;font-size:28px;line-height:1.05;text-wrap:balance}
+.invite{display:flex;align-items:center;gap:14px;border:0;background:none;color:var(--ice);font-weight:700;font-size:14px;letter-spacing:.12em;text-transform:uppercase;padding:6px 0;position:relative;text-align:left;align-self:flex-start}
+.invite::before{content:"";position:absolute;right:calc(100% + 6px);top:50%;width:clamp(30px,5vw,90px);height:2px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.6));transform-origin:right;animation:stub .9s var(--ease) .3s both}
+.invite .dot{width:14px;height:14px;border-radius:50%;background:var(--c);flex:none;animation:beat 2.4s ease-in-out infinite}
+.invite:hover{color:var(--sky)}
+.wq{display:flex;flex-direction:column;gap:12px}
+.fq{font-family:var(--ff-serif);font-weight:400;font-size:clamp(24px,1rem + .7vw,31px);line-height:1.12;text-wrap:balance}
+.ws .hint{color:var(--mute);font-size:15px}
+.ws textarea,.ws input[type=text]{border:0;background:rgba(255,255,255,.9);color:var(--ink);border-radius:6px;font-size:17px;padding:11px 13px;transition:background-color .2s}
+.ws textarea:focus,.ws input[type=text]:focus{outline:3px solid var(--c);outline-offset:2px;background:#fff}
+.ws .compose{display:flex;gap:8px;align-items:stretch}
+.ws .compose textarea{flex:1;min-width:0}
+.ws .btn{background:var(--ice);color:var(--ink);border-radius:6px}
+.cnt{font-size:13px;color:var(--mute);font-variant-numeric:tabular-nums;margin-top:-4px}
+.cnt.over{color:#F6A898;font-weight:700}
+.cnt.shake{animation:shake .4s}
+.ws .chip{background:transparent;border-color:rgba(255,255,255,.7);color:var(--ice);transition:background-color .2s,color .2s}
+.ws .chip[aria-pressed="true"]{background:var(--ice);border-color:var(--ice);color:var(--ink)}
+.chip .cn{margin-left:7px;background:var(--ice);color:var(--ink);border-radius:999px;padding:0 7px;font-size:12px}
+.chip[aria-pressed="true"] .cn{background:var(--ink);color:var(--ice)}
+.nform{display:flex;flex-direction:column;gap:8px}
+.nform .btn{align-self:flex-start}
+.lt{font-weight:700;font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:var(--sky);margin-top:12px}
+.ws .pfoot{justify-content:flex-start;padding-top:0}
+.ov{border-top:1px solid rgba(255,255,255,.16);padding-top:18px}
+.ov summary{cursor:pointer;display:flex;flex-wrap:wrap;gap:6px 12px;align-items:baseline;font-family:var(--ff-serif);font-size:21px;line-height:1.2;list-style:none}
+.ov summary::-webkit-details-marker{display:none}
+.ov .tag{font-family:var(--ff-sans);font-weight:700;font-size:12px;letter-spacing:.1em;text-transform:uppercase;background:rgba(255,255,255,.16);padding:4px 9px}
+.ov[open] summary{margin-bottom:10px}
+.ws .ovrow{border-top-color:rgba(255,255,255,.14)}
+.ws .ovc::before{box-shadow:0 0 0 1.5px var(--ice)}
+
+/* post-its: each person's colour, their name, stars */
+.pis{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:10px;align-items:start}
+.pis>li:nth-child(3n+1) .pi{--rot:-.6deg}.pis>li:nth-child(3n+2) .pi{--rot:.5deg}
+.pis .none{grid-column:1/-1;color:var(--mute);font-size:15px;border:1.5px dashed rgba(255,255,255,.22);padding:9px 12px;border-radius:4px}
+.pi{background:var(--pc);color:var(--ink);padding:11px 12px 8px;border-radius:3px;box-shadow:inset 0 0 0 1px rgba(10,10,10,.16),0 8px 18px rgba(0,0,0,.24);display:flex;flex-direction:column;gap:7px;transform:rotate(var(--rot,0deg));animation:pin .45s var(--ease) both;transition:transform .25s var(--ease)}
+.pi:hover{transform:none}
+.pi .tx{font-size:16px;line-height:1.38;outline:0;overflow-wrap:anywhere}
+.pi .nt{font-family:var(--ff-serif);font-weight:600;font-size:20px;line-height:1.1;outline:0}
+.pi.mine .tx:focus,.pi.mine .nt:focus{box-shadow:0 0 0 2px var(--ink);border-radius:2px}
+.pi.mine .tx:empty::before{content:"Add a sentence…";opacity:.5}
+.pi .meta{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;flex-wrap:wrap}
+.pi .who{opacity:.82}
+.pi .kc{background:rgba(10,10,10,.1);padding:2px 8px;border-radius:999px;font-size:12px}
+.pi .pst{margin-left:auto;display:flex;align-items:center;gap:2px}
+.pi .rm{border:0;background:none;font-size:20px;line-height:1;padding:0 4px;color:rgba(10,10,10,.6);text-decoration:none;align-self:center}
+.pi .rm:hover{color:var(--ink)}
+
+/* ================= what makes something a risk ================= */
+.orb.xpa .ob,.orb.xpa .ohub,.orb.xpa .lines{transition:opacity .4s var(--ease),transform .7s var(--ease),box-shadow .25s,filter .4s}
+.orb.xp1 .ob:not(.big),.orb.xp1 .lines{opacity:.14!important}
+.or.xpon .ws .invite{visibility:hidden}
+.ws .invite{transition:opacity .3s var(--ease)}
+.orb.xp1 .ohub{opacity:.3;filter:saturate(.7)}
+@media (max-width:899px){.orb.xp1 .ob:not(.big),.orb.xp1 .lines{opacity:0!important}.orb.xp1 .ohub{opacity:.16}}
+.orb.xpa .ohub .hin{transition:opacity .4s var(--ease)}
+.orb.xp1 .ohub .hin{opacity:0}
+.orb.xp1 .ob.big .bc>*:not(.h){opacity:0}
+.orb.xp1 .ob.big{cursor:default}
+.orb.xp2 .ob.big{transform:var(--xpT);box-shadow:none}
+.orb.xp2 .ob.big .h{opacity:0;transition:opacity .2s .05s}
+.orb.xp3 .ob.big{opacity:0!important}
+.xpl{position:absolute;left:0;top:0;width:100%;height:100%;z-index:7;pointer-events:none}
+.xc{position:absolute;border-radius:50%;background:color-mix(in srgb,var(--k) calc(var(--ka) * 100%),transparent);box-shadow:inset 0 0 0 2px var(--k);mix-blend-mode:screen;opacity:0;transform:scale(.22);
+  transition:transform .8s var(--ease),opacity .45s var(--ease);transition-delay:calc(var(--n) * .045s);pointer-events:none;cursor:default}
+.xp3 .xc{opacity:1;transform:none;pointer-events:auto}
+.xp3 .xc:hover,.xp3 .xc.hov{transform:scale(1.04);transition:transform .5s var(--ease),opacity .3s;transition-delay:0s}
+.xlab{position:absolute;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;gap:5px;text-align:center;color:var(--ice);text-shadow:0 1px 12px rgba(10,20,40,.65);opacity:0;transition:opacity .4s var(--ease)}
+.xp4 .xlab{opacity:1}
+.xlab svg{width:28px;height:28px;display:block}
+.xlab b{font-family:var(--ff-serif);font-weight:600;font-size:23px;line-height:1.05}
+.xlab:not(.in) b{font-size:18px}
+.xlab .xd{font-size:16px;line-height:1.36}
+.xlab.tiny{gap:3px}.xlab.tiny b{font-size:19px}.xlab.tiny .xd{font-size:14px;line-height:1.3}.xlab.tiny svg{width:22px;height:22px}
+.xlab .x{font-size:14px;line-height:1.3;color:rgba(255,255,255,.88);max-height:0;opacity:0;overflow:hidden;transition:max-height .45s var(--ease),opacity .35s}
+.xc:hover .x,.xc.hov .x{max-height:3.2em;opacity:1}
+.xpv{position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none}
+.xpv .core{opacity:0;transition:opacity .45s var(--ease) .1s}
+.xp3 .xpv .core{opacity:1}
+.xpt{position:absolute;z-index:1;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center;font-family:var(--ff-serif);font-weight:600;line-height:1.08;color:var(--ink);text-wrap:balance;opacity:0;transition:opacity .35s var(--ease);pointer-events:none}
+.xpread{pointer-events:auto;width:36px;height:36px;border:0;padding:0;border-radius:50%;background:rgba(10,10,10,.12);color:var(--ink);display:grid;place-items:center;cursor:pointer;transition:background-color .25s,transform .25s var(--ease)}
+.xpread svg{width:30px;height:30px;overflow:visible}
+.xpread .sf{fill:none;stroke:currentColor;stroke-width:1.6;opacity:.55}
+.xpread .dot{fill:currentColor}
+.xpread .rip{fill:none;stroke:currentColor;stroke-width:1.6;opacity:0;transform-box:fill-box;transform-origin:center}
+.xpread:hover,.xpread:focus-visible{background:rgba(10,10,10,.22);transform:scale(1.08)}
+.xpread:hover .rip,.xpread:focus-visible .rip{animation:ripple 1.3s var(--ease) infinite}
+@keyframes ripple{0%{opacity:.8;transform:scale(1)}100%{opacity:0;transform:scale(2.4)}}
+.xp2 .xpt{opacity:1;transition-delay:.3s}
+.xphead{position:absolute;color:var(--ice);display:flex;flex-direction:column;gap:10px;opacity:0;transform:translateY(8px);transition:opacity .5s var(--ease),transform .6s var(--ease)}
+.xp4 .xphead{opacity:1;transform:none}
+.xphead h2{font-family:var(--ff-serif);font-weight:600;font-size:clamp(30px,1rem + 1.5vw,46px);line-height:1;letter-spacing:-.01em;text-wrap:balance}
+.xphead p{font-size:19px;line-height:1.4;color:rgba(255,255,255,.88)}
+.xpdefs{position:absolute;display:flex;flex-direction:column;gap:14px;color:var(--ice);opacity:0;transition:opacity .6s var(--ease) .15s}
+.xp4 .xpdefs{opacity:1;pointer-events:auto}
+.xpdefs li{padding-top:10px;border-top:2px solid var(--k);display:flex;flex-direction:column;gap:4px}
+.xpdefs b{font-family:var(--ff-serif);font-weight:600;font-size:20px}
+.xpdefs p{font-size:16px;line-height:1.4}
+.xpdefs .x{color:rgba(255,255,255,.8);max-height:0;opacity:0;overflow:hidden;transition:max-height .4s var(--ease),opacity .3s}
+.xpdefs li.hov .x,.xpdefs li:hover .x{max-height:3em;opacity:1}
+.xpnow,.xpnow *{transition:none!important}
+.xpov{position:fixed;inset:0;z-index:35;background:linear-gradient(180deg,var(--sea),var(--abyss) 55%,var(--deep));opacity:0;transition:opacity .45s var(--ease);overflow:auto}
+.xpov.xp1{opacity:1}
+.xpov.xpout{opacity:0}
+html.xpfix{overflow:hidden}
+#xpbtn{position:fixed;z-index:40;left:max(16px,env(safe-area-inset-left,0px));bottom:calc(16px + env(safe-area-inset-bottom,0px) + var(--edh,0px));border:0;display:flex;align-items:center;gap:12px;border-radius:999px;background:var(--ice);color:var(--ink);
+  padding:8px 26px 8px 8px;font-weight:700;font-size:17px;line-height:1.2;box-shadow:0 12px 32px rgba(5,15,35,.5);transition:transform .3s var(--ease),opacity .3s var(--ease)}
+#xpbtn:hover{transform:translateY(-2px)}
+#xpbtn:active{transform:translateY(1px)}
+#xpbtn .mini{flex:none;width:44px;height:42px;display:block}
+#xpbtn .sh,#xpbtn .bk{display:none}
+#xpbtn .bk{align-items:center;gap:10px;padding:11px 0 11px 14px}
+#xpbtn .bk svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round}
+#xpbtn[aria-expanded="true"] .mini,#xpbtn[aria-expanded="true"] .lg,#xpbtn[aria-expanded="true"] .sh{display:none!important}
+#xpbtn[aria-expanded="true"] .bk{display:flex}
+#xpbtn:focus-visible{outline:3px solid var(--ink);outline-offset:2px;box-shadow:0 0 0 7px var(--ice)}
+@media (max-width:899px){html.typing #xpbtn{opacity:0;pointer-events:none}}
+
+/* ================= our room ================= */
+.rmv{padding:clamp(28px,3.5vw,60px) clamp(16px,3vw,52px) 130px;color:var(--ice);display:flex;flex-direction:column;gap:40px;--mute:rgba(255,255,255,.72)}
+.rmhead{display:flex;flex-direction:column;gap:10px;max-width:920px}
+.rmhead .eyebrow{color:var(--sky)}
+.names{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.nm{border:1.5px solid rgba(255,255,255,.5);background:transparent;color:var(--ice);border-radius:999px;padding:6px 15px 6px 11px;font-weight:700;font-size:15px;display:inline-flex;align-items:center;gap:8px;transition:background-color .2s,color .2s,border-color .2s}
+.nm:first-child{padding-left:15px}
+.nm i{width:14px;height:14px;border-radius:50%;background:var(--pc);box-shadow:inset 0 0 0 1px rgba(10,10,10,.2)}
+.nm:hover{border-color:var(--ice)}
+.nm[aria-pressed="true"]{background:var(--ice);color:var(--ink);border-color:var(--ice)}
+.rcols{display:grid;grid-template-columns:repeat(var(--n),minmax(0,1fr));gap:clamp(22px,2.6vw,44px)}
+.rcol{display:flex;flex-direction:column;gap:12px;padding-top:18px;border-top:3px solid var(--c)}
+.rcol>.eyebrow{color:var(--sky)}
+.rcol h3,.rnew h3,.rcreep h3{font-family:var(--ff-serif);font-weight:600;font-size:clamp(24px,1rem + .8vw,32px);line-height:1.05;text-wrap:balance}
+.rcol h4{font-weight:700;font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:var(--sky);margin-top:16px}
+.rcol h5{font-size:14px;font-weight:700;color:rgba(255,255,255,.8);margin:6px 0 -4px}
+.rcol .pis{grid-template-columns:minmax(0,1fr)}
+.rmv .none{color:var(--mute);font-size:15px}
+.rnew,.rcreep{display:flex;flex-direction:column;gap:12px}
+.rnew .hint{color:var(--mute)}
+.rnew .pis{grid-template-columns:repeat(auto-fill,minmax(270px,1fr));max-width:1100px}
+.rcreep ul{display:flex;flex-direction:column;gap:10px}
+.rcreep li{display:flex;align-items:center;gap:12px;font-size:17px;flex-wrap:wrap}
+.rcreep .cn{min-width:32px;height:32px;border-radius:16px;background:var(--oc);color:var(--ink);display:grid;place-items:center;font-size:15px;padding:0 8px}
+.rcreep .from{color:var(--mute);font-size:14px}
+/* the record */
+.rc{padding:clamp(28px,3.5vw,60px) clamp(16px,3vw,52px) 130px}
+.rcw{max-width:920px;display:flex;flex-direction:column;gap:16px;color:var(--ice)}
+.rcw h2{font-family:var(--ff-serif);font-weight:600;font-size:clamp(30px,1rem + 1.6vw,44px);line-height:1}
+.rcw .lead{color:rgba(255,255,255,.88)}
+.rcw .acts{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.rcw .toast{color:var(--pick)}
+.rcw .out{border:0;border-radius:6px;min-height:420px;color:var(--ink);background:var(--paper)}
+.need{color:var(--ice)}
+
+@media (max-width:899px){
+  .or{display:block}
+  .orb{position:relative;top:0}
+  .ws{padding:6px 16px 120px;max-width:none;gap:28px}
+  .wsh{display:flex}
+  .ws.hush{display:none}
+  .invite::before{display:none}
+  .rcols{grid-template-columns:minmax(0,1fr)}
+  #xpbtn{padding:6px 18px 6px 6px;font-size:16px}
+  #xpbtn .mini{width:34px;height:33px}
+  #xpbtn .lg{display:none}#xpbtn .sh{display:inline}
+  main{padding-bottom:80px}
+  .pis{grid-template-columns:minmax(0,1fr)}
+  .full .fbody{font-size:15px}
+}
+@media (max-width:560px){
+  .mast .t3{justify-content:space-between}
+  .ch .intro{padding-bottom:6px}
+}
+
+/* ================= the tab bar: Our cluster opens out into its parts, as on the iceberg ================= */
+.tabs ol{flex-wrap:wrap;align-items:stretch}
+.tabs li{display:flex;flex:none}
+.tabs button{border:0;background:none;color:var(--ice);font-weight:700;font-size:15px;white-space:nowrap;padding:12px clamp(10px,1.2vw,20px);display:flex;align-items:center;gap:8px}
+.tabs button:hover{background:rgba(255,255,255,.14)}
+.tabs button[aria-current="page"]{background:var(--pick);color:var(--ink)}
+.tabs .grp{background:var(--c,#B868C0);color:var(--ink)}
+.tabs .grp>button.gh,.tabs .grp .subs button{color:var(--ink)}
+.tabs .grp .gh{padding:12px 14px;gap:10px}
+.tabs .grp.here .gh{box-shadow:inset 0 -4px 0 var(--ink)}
+.tabs .grp.open .gh{box-shadow:inset -1.5px 0 0 rgba(10,10,10,.3)}
+.tabs .grp.open.here .gh{box-shadow:inset 0 -4px 0 var(--ink),inset -1.5px 0 0 rgba(10,10,10,.3)}
+.tabs .grp .gh[aria-current="page"]{background:transparent;color:var(--ink)}
+.tabs .subs{display:flex;max-width:0;overflow:hidden;transition:max-width .55s var(--ease)}
+.tabs .grp.open .subs{max-width:620px}
+.tabs .subs button{padding:12px 12px;gap:7px}
+.tabs .subs button:hover{background:rgba(10,10,10,.1)}
+.tabs .grp .subs button[aria-current="step"]{background:var(--ink);color:var(--ice)}
+@media (max-width:760px){
+  .tabs .grp.open{flex:1 1 100%;flex-wrap:wrap}
+  .tabs .grp.open .gh{flex:1 1 100%;box-shadow:inset 0 -1.5px 0 rgba(10,10,10,.25)}
+  .tabs .grp.open .subs{flex:1 1 100%;max-width:none}
+  .tabs .grp.open .subs button{flex:1;justify-content:center}
+  .tabs .grp.open .subs{flex-wrap:wrap}
+  .tabs .grp.open .subs button{flex:1 1 auto}
+}
+@media (max-width:560px){.tabs button{font-size:14px;padding:11px 10px}}
+
+/* ================= one header bar: just the title, with the timer as a small pill on the right ================= */
+:root{--max:1532px;--bar2:#4A8240}
+.top{position:relative;background:var(--sea);color:var(--ice)}
+.top .wrap{position:relative;display:flex;align-items:center;justify-content:space-between;gap:12px 20px;min-height:clamp(84px,4.5vw + 62px,132px);padding-top:16px;padding-bottom:16px}
+.top h1{font-family:var(--ff-serif);font-weight:400;font-size:clamp(32px,1.1rem + 1.9vw,54px);line-height:1;letter-spacing:-.01em;min-width:0}
+.top h1 b{font-family:var(--ff-sans);letter-spacing:-.02em}
+.tpill{display:flex;align-items:center;gap:8px;flex:none}
+#tbtn{border:0;display:inline-flex;align-items:center;gap:9px;background:var(--pick);color:var(--ink);border-radius:999px;padding:6px 18px 6px 7px;font-weight:700;font-size:18px;line-height:1;font-variant-numeric:tabular-nums;box-shadow:0 6px 18px rgba(10,20,40,.25);transition:transform .2s var(--ease),background-color .3s}
+#tbtn:hover{transform:scale(1.04)}
+#tbtn:active{transform:translateY(1px)}
+#tbtn svg{width:32px;height:32px;flex:none;display:block}
+#tbtn .clk{min-width:3.1em;text-align:left}
+#tbtn small{font-size:13px;margin-left:3px}
+#tbtn.done{background:#E06050}
+#tbtn.done .clk{min-width:0;font-size:16px}
+.tre{width:32px;height:32px;border-radius:50%;border:0;padding:0;background:rgba(255,255,255,.16);color:var(--ice);display:grid;place-items:center;transition:background-color .2s}
+.tre:hover{background:rgba(255,255,255,.28)}
+.tre svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+/* presenting: a tiny unlabelled switch in the header's corner */
+#present{position:absolute;right:max(10px,env(safe-area-inset-right,0px));bottom:6px;border:0;background:none;padding:4px;opacity:.38;transition:opacity .2s}
+#present:hover,#present:focus-visible,#present[aria-checked="true"]{opacity:.9}
+#present i{display:block;width:24px;height:13px;border-radius:999px;background:rgba(255,255,255,.35);position:relative;transition:background-color .25s}
+#present i::after{content:"";position:absolute;top:2px;left:2px;width:9px;height:9px;border-radius:50%;background:var(--ice);transition:transform .25s var(--ease)}
+#present[aria-checked="true"] i{background:var(--pick)}
+#present[aria-checked="true"] i::after{transform:translateX(11px);background:var(--ink)}
+#present:active{transform:none}
+
+/* the green bar, full width; the group you are in sits on a lighter green and the active tab has a white line under it */
+.tabs{background:var(--bar)}
+.tabs ol{background:none}
+.tabs button[aria-current="page"]{background:var(--bar2);color:var(--ice);box-shadow:inset 0 -4px 0 var(--ice)}
+.tabs .grp{background:none;color:var(--ice);transition:background-color .35s var(--ease)}
+.tabs .grp.here{background:var(--bar2)}
+.tabs .grp.open:not(.here){background:rgba(255,255,255,.07)}
+.tabs .grp>button.gh,.tabs .grp .subs button{color:var(--ice)}
+.tabs .grp.here .gh,.tabs .grp.open .gh,.tabs .grp.open.here .gh{box-shadow:inset -1.5px 0 0 rgba(255,255,255,.28)}
+.tabs .grp .gh[aria-current="page"]{background:none}
+.tabs .subs button:hover{background:rgba(255,255,255,.12)}
+.tabs .grp .subs button[aria-current="step"]{background:none;color:var(--ice);box-shadow:inset 0 -4px 0 var(--ice)}
+.tabs .gchev{display:block;width:14px;height:14px;margin-left:-2px;opacity:.8}
+.tabs .gchev svg{display:block;width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2.8;stroke-linecap:round;stroke-linejoin:round}
+.tabs .grp.open .gchev{display:none}
+@media (max-width:760px){
+  .tabs .grp.open .gh{box-shadow:inset 0 -1.5px 0 rgba(255,255,255,.22)}
+}
+
+/* ================= a risk, step by step ================= */
+.ws{max-width:740px}
+.ws .step{font-family:var(--ff-sans);font-weight:700;font-size:clamp(19px,.85rem + .55vw,24px);line-height:1.2;letter-spacing:.08em;text-transform:uppercase;color:var(--ice);outline:0;text-wrap:balance}
+.ws .invite{text-transform:none;letter-spacing:0;font-size:17px;gap:12px;padding:2px 0}
+.ws .invite::before{display:none}
+.stepn{display:none}
+.ws .s1{display:flex;flex-direction:column;gap:22px;align-items:flex-start;margin-top:-8px}
+.fin{border:0;display:inline-flex;align-items:center;gap:10px;background:var(--ink);color:var(--ice);font-weight:700;font-size:18px;line-height:1.2;padding:13px 26px 13px 21px;border-radius:999px;box-shadow:0 8px 22px rgba(0,0,0,.28);white-space:nowrap;transition:transform .2s var(--ease)}
+.fin .tk{display:block;width:19px;height:19px;flex:none}
+.fin .tk svg{display:block;width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
+.fin:hover{transform:scale(1.03)}
+.ws .fin{box-shadow:0 0 0 1.5px rgba(255,255,255,.45),0 10px 26px rgba(0,0,0,.3)}
+.full .fin{position:absolute;left:50%;top:calc(100% + max(2px,(var(--cap,60px) - 50px) / 2));transform:translateX(-50%);z-index:3}
+.full .fin:hover{transform:translateX(-50%) scale(1.03)}
+.full .fin:active{transform:translateX(-50%) translateY(2px)}
+.wq .qn{font-weight:700;font-size:14px;line-height:1.2;letter-spacing:.12em;text-transform:uppercase;color:var(--sky)}
+.wq .qn+.fq{margin-top:-4px}
+.ws .fq{font-weight:600;color:#F0E060;font-size:clamp(27px,1rem + 1.05vw,36px);line-height:1.1}
+.ws .wq.gap{margin-top:58px}
+.oth{display:inline-flex;align-items:center;gap:12px;border:0;background:none;color:var(--ice);font-weight:700;font-size:17px;line-height:1.3;padding:6px 0;align-self:flex-start;text-align:left}
+.oth i{flex:none;width:46px;height:26px;border-radius:999px;background:rgba(255,255,255,.24);position:relative;transition:background-color .25s}
+.oth i::after{content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:var(--ice);transition:transform .25s var(--ease),background-color .25s}
+.oth[aria-checked="true"] i{background:var(--pick)}
+.oth[aria-checked="true"] i::after{transform:translateX(20px);background:var(--ink)}
+.oth:hover i{background:rgba(255,255,255,.34)}
+.oth[aria-checked="true"]:hover i{background:var(--pick)}
+.oth:active{transform:none}
+.ws .others{gap:16px;margin-top:6px;padding-top:24px;border-top:1px solid rgba(255,255,255,.16)}
+.oq{display:flex;flex-direction:column;gap:3px;margin:8px 0 0;font-weight:400}
+.oq .oqt{font-family:var(--ff-serif);font-size:21px;line-height:1.2;text-wrap:balance}
+.chg{align-self:flex-start;border:0;background:none;color:var(--mute);font-size:14px;font-weight:700;text-decoration:underline;text-underline-offset:3px;padding:4px 0;margin-top:-6px}
+.chg:hover{color:var(--ice)}
+
+/* likes: a white heart with a count */
+.heart{border:0;background:rgba(10,10,10,.5);color:#fff;border-radius:999px;padding:3px 10px 3px 8px;min-height:26px;font-size:14px;display:inline-flex;gap:5px;align-items:center;font-weight:700;line-height:1;transition:background-color .2s,transform .2s var(--ease)}
+.heart svg{width:16px;height:16px;display:block;fill:#fff;opacity:.5;transition:opacity .2s,transform .35s var(--ease)}
+.heart:hover{transform:scale(1.07);background:rgba(10,10,10,.62)}
+.heart:hover svg{opacity:.8}
+.heart.on{background:var(--ink)}
+.heart.on svg{opacity:1;transform:scale(1.12)}
+.heart.own{background:rgba(10,10,10,.28);cursor:default}
+.heart.own svg{opacity:.85}
+.heart.own:hover{transform:none}
+.heart .sc:empty{display:none}
+
+/* asking for a name when there isn't one yet */
+#askname{position:fixed;z-index:45;left:0;right:0;margin:0 auto;top:clamp(90px,18vh,200px);width:min(460px,calc(100vw - 32px));background:var(--paper);color:var(--ink);padding:20px 22px;border-radius:8px;box-shadow:0 20px 60px rgba(4,10,24,.55);display:flex;flex-direction:column;gap:12px;animation:fadeup .35s var(--ease) both}
+#askname label{font-family:var(--ff-serif);font-weight:600;font-size:26px;line-height:1.1}
+#askname .row{display:flex;gap:8px}
+#askin{flex:1;min-width:0;border:2px solid var(--ink);border-radius:4px;padding:10px 12px;font-size:18px;font-weight:700}
+#askin.ask{animation:namepulse 1s ease-in-out 2}
+#askname .btn{border-radius:4px}
+#askname .hint{font-size:15px}
+
+/* presenting: no movement, bigger small text */
+html.present *,html.present *::before,html.present *::after{animation:none!important;transition:none!important}
+html.present .hint,html.present .ws .hint,html.present .rnew .hint{font-size:18px}
+html.present .eyebrow{font-size:14px}
+html.present .cnt,html.present .rcreep .from{font-size:16px}
+html.present .pi .tx{font-size:18px}
+html.present .pi .meta,html.present .heart{font-size:16px}
+html.present .lt,html.present .rcol h4,html.present .wq .qn{font-size:16px}
+html.present .rcol h5{font-size:16px}
+html.present .chip{font-size:17px}
+html.present .full .fbody{font-size:18px}
+html.present .tabs button{font-size:17px}
+html.present .chg{font-size:16px}
+
+@media (max-width:899px){
+  .stepn{display:block;padding:20px 16px 0}
+  .stepn:empty{display:none}
+  .stepn .step{font-weight:700;font-size:20px;line-height:1.2;letter-spacing:.08em;text-transform:uppercase;color:var(--ice);outline:0}
+  .ws .s1{margin-top:0}
+  .ws .wq.gap{margin-top:40px}
+  .full .fin{font-size:15px;padding:9px 18px 9px 15px;gap:8px}
+  .full .fin .tk,.full .fin .tk svg{width:16px;height:16px}
+}
+@media (max-width:560px){
+  #tbtn{font-size:16px;padding:5px 14px 5px 6px;gap:7px}
+  #tbtn svg{width:28px;height:28px}
+  .tre{width:28px;height:28px}
+  .fin{font-size:17px}
+}
+
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+/* the risk circle pulses until it has been opened, inviting people to read it in full */
+.ob.beckon::after{content:"";position:absolute;inset:-6px;border-radius:50%;border:3px solid color-mix(in srgb,var(--c) 80%,#fff);pointer-events:none;animation:beckon 1.9s cubic-bezier(.2,.6,.3,1) infinite}
+@keyframes beckon{0%{transform:scale(1);opacity:.9}70%{opacity:0}100%{transform:scale(1.16);opacity:0}}
+html.present .ob.beckon::after{animation:none;transform:scale(1.04);opacity:.9}
+@media (prefers-reduced-motion:reduce){.ob.beckon::after{animation:none;transform:scale(1.04);opacity:.9}}
+
+/* ================= 22 Oct afternoon ================= */
+/* reading a risk in full: the title and text half as big again, with more space under the title (the circle scrolls) */
+.full h3{font-size:clamp(33px,1.5rem + 1.2vw,48px);line-height:1.04;margin-bottom:18px}
+.full .fbody{font-size:24px;line-height:1.45;gap:18px}
+.full .fbody ol{gap:9px}
+html.present .full .fbody{font-size:26px}
+@media (max-width:899px){
+  .full h3{font-size:clamp(26px,1.2rem + 1vw,32px);margin-bottom:12px}
+  .full .fbody{font-size:19px;gap:14px}
+  html.present .full .fbody{font-size:20px}
+}
+/* more room between the risk circle and the questions */
+@media (min-width:900px){.ws{padding-left:clamp(20px,2.2vw,40px)}}
+/* the two questions: Poppins, white */
+.ws .fq{font-family:var(--ff-sans);font-weight:700;color:var(--ice);font-size:clamp(23px,.85rem + .85vw,31px);line-height:1.2;letter-spacing:-.005em}
+/* the boxes you type in: see-through white, white writing */
+.ws textarea,.ws input[type=text]{background:rgba(255,255,255,.12);color:var(--ice);box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.4);caret-color:var(--ice)}
+.ws textarea::placeholder,.ws input[type=text]::placeholder{color:rgba(255,255,255,.66);opacity:1}
+.ws textarea:focus,.ws input[type=text]:focus{background:rgba(255,255,255,.2);box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.7)}
+/* the labels, when picked: see-through white */
+.ws .chip[aria-pressed="true"]{background:rgba(255,255,255,.3);border-color:var(--ice);color:var(--ice)}
+.ws .chip[aria-pressed="true"] .cn{background:var(--ice);color:var(--ink)}
+/* Next risk / Something new / See our room, and What makes something a risk?: black pills with a thin white edge, like I've finished reading */
+.ws .fin{box-shadow:0 0 0 1.5px rgba(255,255,255,.6),0 10px 26px rgba(0,0,0,.3)}
+.ws .gobtn{background:var(--ink);color:var(--ice);box-shadow:0 0 0 1.5px rgba(255,255,255,.6),0 10px 26px rgba(0,0,0,.3)}
+#xpbtn{background:var(--ink);color:var(--ice);box-shadow:0 0 0 1.5px rgba(255,255,255,.6),0 12px 32px rgba(5,15,35,.5)}
+#xpbtn:focus-visible{outline:3px solid var(--pick);outline-offset:3px;box-shadow:0 0 0 1.5px rgba(255,255,255,.6)}
+
+/* what to do: a white pill at the right end of the tab bar, opening a short note under it */
+.tabs .wrap{position:relative}
+@media (min-width:900px){.tabs.hastodo #tabs{padding-right:178px}}
+.todo{position:absolute;z-index:25;right:max(16px,env(safe-area-inset-right,0px));top:50%;transform:translateY(-50%)}
+.todo[hidden]{display:none!important}
+#todo .todob{border:0;border-radius:999px;background:#fff;color:var(--ink);display:inline-flex;align-items:center;gap:9px;padding:4px 16px 4px 4px;font-weight:700;font-size:16px;line-height:1.2;white-space:nowrap;box-shadow:0 4px 14px rgba(10,20,40,.25)}
+#todo .todob i{width:27px;height:27px;border-radius:50%;background:var(--ink);color:#fff;display:grid;place-items:center;font-family:var(--ff-serif);font-style:normal;font-weight:600;font-size:17px;line-height:1}
+#todo .todob:hover{box-shadow:0 6px 20px rgba(10,20,40,.35)}
+#todo .todob[aria-expanded="true"]{box-shadow:0 0 0 2px var(--ink),0 6px 20px rgba(10,20,40,.35)}
+.todop{position:absolute;right:0;top:calc(100% + 14px);width:min(370px,calc(100vw - 32px));max-height:calc(100vh - 160px);overflow:auto;overscroll-behavior:contain;background:#fff;color:var(--ink);padding:18px 20px;border-radius:18px;box-shadow:0 18px 50px rgba(10,20,40,.4);display:flex;flex-direction:column;gap:10px;text-align:left;animation:fadeup .3s var(--ease) both}
+.todop[hidden]{display:none!important}
+.todop h3{font-weight:700;font-size:19px;line-height:1.2;padding-right:30px}
+.todop .tdt{font-weight:700;font-size:15px;line-height:1.35}
+#todo .tdparts{display:flex;flex-direction:column;gap:6px}
+#todo .tdparts li{display:flex;flex-direction:column;gap:1px;padding:5px 0 5px 12px;border-left:3px solid rgba(10,10,10,.16);font-size:14px;line-height:1.35}
+#todo .tdparts li.cur{border-left-color:var(--c)}
+.tdparts .tdn{display:flex;justify-content:space-between;gap:10px;font-size:15px}
+.tdparts .tdm{font-weight:700;white-space:nowrap}
+.tdparts .tds{color:#45525A}
+#todo .tddo{display:block;background:none;list-style:decimal;padding:10px 0 0 20px;font-size:15px;line-height:1.4;border-top:1.5px solid rgba(10,10,10,.14)}
+#todo .tddo li{display:list-item;margin-top:5px}
+#todo .tddo li:first-child{margin-top:0}
+#todo .tdx{position:absolute;top:8px;right:8px;width:32px;height:32px;border:0;border-radius:50%;background:transparent;color:var(--ink);font-size:22px;line-height:1;display:grid;place-items:center;padding:0 0 2px}
+#todo .tdx:hover{background:#E7EBED}
+html.present #todo .tdparts li,html.present #todo .tddo,html.present #todo .tdt,html.present #todo .tdparts .tdn{font-size:17px}
+@media (max-width:899px){
+  .todo{position:fixed;top:auto;transform:none;right:max(12px,env(safe-area-inset-right,0px));bottom:calc(16px + env(safe-area-inset-bottom,0px))}
+  #todo .todob{padding:6px 14px 6px 6px;font-size:15px;gap:8px;box-shadow:0 0 0 1.5px rgba(10,20,40,.15),0 10px 28px rgba(5,15,35,.5)}
+  .todop{top:auto;bottom:calc(100% + 10px);max-height:calc(100vh - 140px)}
+  html.typing .todo{opacity:0;pointer-events:none}
+}
+@media (max-width:480px){.todo{bottom:calc(72px + env(safe-area-inset-bottom,0px))}}
 </style>
 <div id="root"></div>
-<script type="application/json" id="copy">{}</script>
+<script type="application/json" id="copy">{"or.ready":"Skip"}</script>
 <script type="application/json" id="data">{"core": {"R01": {"t": "AI used to manipulate people for profit", "d": "AI is very good at changing minds, and companies use it to win attention, sell products and shape how people see the world.", "b": "<p><strong>AI is very good at changing your mind.<\/strong> Last year, peer-reviewed studies found that a person’s political views could change more strongly after talking to a chatbot than by watching an ordinary campaign advert. AI is also being used by companies more and more to achieve their own goals: to get more attention, sell more products and sometimes even persuade people to see the world in ways that suit them.<\/p><p><strong>You’re also not very good at spotting when AI changes your point of view.<\/strong> Research has found that chatbots with built-in bias can shift opinions without users realising it — and that people often can’t spot adverts hidden in an AI’s answers.<\/p><p><strong>Political influence can also happen when nobody plans it.<\/strong> For example, a study on 24 different chatbots found that their answers to political questions were all quite similar, with no evidence that any bias was built-in intentionally.<\/p><p><strong>Currently, at least 1 major AI chatbot shows adverts.<\/strong> For now, these are kept separate from the answers, but experts are worried that paid messages, or a company’s preferred views could one day be mixed into the answers themselves. A wider worry — that AI could weaken the shared facts at the foundations of democracy — is emphasised in other risks on the map.<\/p>"}, "R02": {"t": "AI content flooding democratic processes", "d": "Public life assumes writing in takes human effort. AI removes that “effort filter”, so consultations, councils and courts can be flooded.", "b": "<p><strong>Public life often works by inviting people to write in:<\/strong> planning applications, government consultations, committee evidence, court &amp; legal filings, complaints, grant applications — the list goes on! A lot of this assumes that it takes some human-sized amount of effort to write a letter, so <strong>the pile of letters ought to stay roughly human-sized.<\/strong> However, because of AI, this assumption is no longer true and <strong>public processes and legal systems are at risk of disruption and manipulation.<\/strong><\/p><p><strong>Having the time and effort to write a letter may not be a fair barrier to public life in the first place.<\/strong> After all, it favours people who have time, money and employees. But it did make it harder for any one participant to flood the room. Now that AI can overcome this <strong>‘effort filter’<\/strong>, real people are using it to take part in public processes in ways they couldn’t before, but it could break systems which depend on the effort filter to function properly.<\/p><p>The US got a taste of this in June 2025, where an air quality board in California was deciding on whether to tighten rules on transitioning from gas heaters to electric ones. Just before the vote, they <strong>received over 20,000 emails from an ‘AI-powered grassroots advocacy platform’ opposing the motion<\/strong> and the board decided against passing the motion. However, many weeks later, most of the named senders were not available to respond to investigators, or the few who did respond knew little or nothing about the letters their names were attached to.<\/p>"}, "R03": {"t": "AI companions shaping how young people grow up", "d": "Children turn to always-available, agreeable AI companions and may learn less from real relationships.", "b": "<p>Children increasingly are choosing to use AI tools for tutoring and mental health support over speaking with parents, teachers or friends. Some children form strong attachments to always-available, agreeable AI companions and can begin to prefer them to real relationships.<\/p><p>Social skills (like empathy and conflict resolution) are usually learnt through real human interactions, so as these AI systems enter children’s developing minds and daily environments, it can affect how kids relate to family and peers.<\/p>"}, "R05": {"t": "AI companies controlling who can check their AI models", "d": "The companies building AI decide who tests it for dangers, how long they get and what they can see.", "b": "<p><strong>Before a powerful AI model is released to the public, testers attempt to check it for dangers.<\/strong> But unlike safety tests on things like cars &amp; aeroplanes, the companies creating AI get to decide for themselves who becomes a tester, how long they have to investigate and what permissions they are given.<\/p><p>This is because these companies — a tiny number of them, in the United States and China — are the only ones with the computing power, the data and the access that is needed to test whether it’s safe in the first place. The UK’s AI Security Institute has over 100 technical staff who can test models, but it currently relies on voluntary agreements with powerful US companies and ongoing goodwill — which can make it harder to publish findings the companies won’t like.<\/p><p>This risk is connected to a wider problem of AI companies concentrating economic power. This is covered under “AI companies too big to regulate”.<\/p>"}, "R06": {"t": "AI with no safety guardrails", "d": "Some AI is released so anyone can download and change it. Its safety features can be stripped out and the AI passed on.", "b": "<p>Some AI companies release their models openly, so that anyone can download, run and change them. This has some benefits, as it means smaller researchers and organisations can study and build on them. <strong>But it also means the safety features can be removed.<\/strong> As open models catch up with the best closed ones, this now includes some of the most powerful AI systems ever developed.<\/p><p>These <strong>safety guardrails prevent<\/strong> you from using a model to make <strong>weapons of mass destruction<\/strong>, or launch <strong>cyberattacks<\/strong>, or to <strong>scam<\/strong> others and commit <strong>fraud<\/strong>, or fabricate <strong>deepfakes<\/strong>, or <strong>harm children<\/strong> or yourself. A study in 2024, however, showed that these guardrails can be undone for pennies’ worth of compute — and there are thousands of modified AI models on the internet available to download already.<\/p><p>The problem is that <strong>nobody is responsible for stopping this.<\/strong> Most AI laws give responsibilities to a company that builds a model and an organisation that uses it. Someone who makes cheap changes to a model and re-shares it falls outside these laws, and once a model is on someone else’s private computer, no company or government can see what it’s used for or take it back.<\/p>"}, "R07": {"t": "AI building AI faster than we can oversee", "d": "AI increasingly helps build the next AI and could improve faster than people can follow it or switch it off.", "b": "<p class=\"lede\">Many people want AI systems to be aligned with our intentions and under our control. There is a risk, however, that a model could cause harm and be difficult to switch off.<\/p><p>Right now, people can still follow how an AI model is reasoning and acting, and step in if needed. <strong>But as AI begins to be used to help build newer AI, it could improve faster than safety checks and regulators can keep up.<\/strong> In other words, by the time they decided to switch a model off, it may be too late.<\/p><p>AI builds AI by writing pieces of code, creating synthetic training data and suggesting improvements to software engineers. As this gets more involved, <strong>it can be difficult for engineers to track what’s changing and why<\/strong> — and without the ability to notice and respond, workers can’t oversee and control an AI’s activity.<\/p><p>Before publicly announcing the existence of a new model, AI companies use and test it themselves — and they don’t have to say what problems they find. In the UK, one public body does have the expertise to follow the behaviour of frontier AI models — the AI Security Institute — however <strong>it has no power to compel access.<\/strong> This is outlined in another risk in this cluster on the risk map.<\/p><p>This issue emphasises the limits in oversight and control of new AI models. A related scenario, about countries racing to use AI to build AI, and in the process developing a model which is misaligned with human intentions and wellbeing, was discussed by experts but did not make the final map of 13 risks.<\/p>"}, "R08": {"t": "Using AI to predict and steer people’s lives", "d": "AI is handed years of our personal data and could learn enough to predict, and steer, the course of a person’s life.", "b": "<p>People are handing AI years of people’s personal data: searches, purchases, conversations, health and location information. This risks AI learning so much about a person that they can accurately model the trajectory of their life, including predicting their habits, weaknesses and future behaviour. This may give AI companies the ability to control citizens across the globe.<\/p>"}, "R09": {"t": "AI choosing who gets targeted in war", "d": "AI can sift huge amounts of military intelligence to find, track and target people, including a country’s leaders.", "b": "<p>The ability of AI to make sense of large amounts of military intelligence increases the risk that it is used to find the whereabouts of leaders, plan and simulate actions to go after them and then follow through on these plans with more precision and fewer casualties. In 2026, the US captured the leader of Venezuela and killed Iran’s Supreme Leader after AI tools were used to map his daily movements and help confirm his location. As this becomes easier, powerful people in government may put military might over laws or diplomacy.<\/p><p>The White House Deputy Chief of Staff for Policy and Homeland Security Advisor, Stephen Miller, said in January 2026:<\/p><blockquote><em>“We live in a world in which, you can talk about international niceties and everything else, but we live in a world, in the real world — that is governed by strength, that is governed by force, that is governed by power. These are the iron laws of the world since the beginning of time.”<\/em><\/blockquote><p><strong>The same capability is also used on people in urban warfare, at great volume.<\/strong> Throughout 2026, US forces have been using an AI-fused targeting system supplied by Palantir to help process up to 1,000 targets in a single day by combining satellite images, drone footage and human intelligence reports into targeting plans. On February 28, 2026, a strike planned using this system killed over 120 young girls in Shajareh, Iran — at a primary school wrongly connected to a nearby naval base.<\/p>"}, "R10": {"t": "AI making wars faster and harder to control", "d": "Militaries race to put AI that acts on its own into command and control, faster than humans can step in.", "b": "<p>Countries have always competed to build more powerful military technology. Recent AI developments raise the risk of a runaway version of this, where agentic AI systems (those that act on their own) become a part of the command-and-control of large militaries.<\/p><p>This could lead to:<\/p><ol><li><strong>Automation.<\/strong> Someone asked to review a thousand AI-recommended targets at once may simply defer to the machine rather than check each one.<\/li><li><strong>Escalation.<\/strong> Countries could lose control of their militaries to unpredictable and flawed AI systems. If these systems aren’t explicitly programmed to seek peace and de-escalate conflicts, they could quickly trigger a catastrophic war.<\/li><li><strong>Unaccountability.<\/strong> Countries could get away with war crimes. Because international humanitarian law is written in terms of human intentions and clear chains of command, the picture gets muddied when life-or-death decisions are made across a system with plausible deniability.<\/li><\/ol>"}, "R11": {"t": "AI lowering barriers to weapons of mass destruction", "d": "AI can act like an expert lab assistant, giving many more people the know-how to make chemical and biological weapons.", "b": "<p>AI has become so good at biology and chemistry that it can act like an expert lab assistant, giving thousands of people the knowledge of an elite, PhD-level scientist. This lowers the barrier to bad actors developing chemical &amp; biological weapons, including new viruses and toxins which could prove deadly in densely populated cities and places with limited public health systems.<\/p>"}, "R12": {"t": "AI incidents crossing borders without international cooperation", "d": "AI built in one country is used everywhere. When it causes harm, there is no shared way to report, track or respond.", "b": "<p>An AI model can be built in one country and used by people all over the world. <strong>If something goes wrong, the AI company can be far away and hard for local authorities to reach.<\/strong><\/p><p>Right now, most AI incidents come to light through news stories, social media posts and whistleblowers, not through any system built to spot them. Companies have little reason to volunteer bad news. <strong>Countries don’t agree on what counts as an AI incident<\/strong> and those with no AI safety body of their own may have <strong>no way to notice that something has gone wrong.<\/strong><\/p><p>There is no agreed system for countries to share and respond to incidents and no requirement for US companies to report misuse to the UK government. In September 2026, the US and China agreed to set up a channel to talk about AI incidents. The UK is not part of it, and no details have been published.<\/p><p>In June 2025, a US AI company banned a Canadian user’s account over violent activity, but did not tell the police, saying it saw no sign of an imminent attack. In February 2026, that person carried out a deadly attack. The company has since changed its rules on contacting police. The risk is that <strong>without agreed rules on who tells whom, governments only react after a disaster instead of preparing in advance.<\/strong><\/p>"}, "R14": {"t": "AI companies too big to regulate", "d": "The economy has come to rely on a few AI companies succeeding, so governments are reluctant to restrict them.", "b": "<p>The economy as a whole has come to rely on a small number of AI companies succeeding.<\/p><p>A small number of very big companies are carrying a lot of the economy on their backs. In the USA, the ten largest companies (mostly tech firms invested in AI) make up nearly 40% of the total value of the largest 500 companies. Investment in things like data centres accounted for about 92% of the growth in the US economy, despite being only about 4% of value, according to a Harvard economist.<\/p><p>These companies also fund each other, making demand for AI products look bigger than it might otherwise be. The Bank of England has warned that AI economic predictions may be inflated by these ‘circular’ deals.<\/p><p>When a handful of companies are essential to growth, governments want them to keep succeeding and are reluctant to restrict them. Any rule that might slow these companies down becomes costly to pass, and may affect the country’s overall economic performance. But if companies are ‘too big to fail’, they’re very hard to regulate.<\/p><p>As AI gets built into the workforce — into hospitals, courts, schools, transport and government services — the companies that control the essential building blocks of AI (AI models, advanced computer chips, special software, computing power, energy &amp; land) can set the terms everyone else must follow.<\/p><p>Unlike national infrastructure like water or electricity, AI companies are not required to keep prices controlled, serve wide groups of people and to supply their service even when it isn’t profitable to them.<\/p><p>The long-term risk is that a lasting arrangement is formed, where countries don’t learn to build their own AI, and instead keep renting it from a few companies forever more. But once a government is running its key institutions on AI that it rents from a company it doesn’t control, it may be giving away its power.<\/p>"}, "R15": {"t": "AI doing our thinking for us", "d": "People and institutions move from trusting AI, to relying on it, to depending on it, and stop using their own judgement.", "b": "<p>As AI keeps giving useful advice and recommendations, people and institutions may move from trusting it → to relying on it → to depending on it completely, and in the process stop using human judgement to think things through fully themselves.<\/p><p>Many institutions, such as hospitals, courts and the armed forces, are now training people to use AI systems in their work, potentially risking their ability to reach a decision without it. Over time an institution may even lose the capacity to check the software which shapes AI analysis and recommendations, as fewer and fewer people within it remember another way.<\/p>"}}, "supp": {"R04": {"t": "Data that's safe today becomes dangerous tomorrow", "b": "<p>We hand over data all the time on the understanding that it is anonymous, or boring, or well enough protected. Every one of those judgements is made using today's technology.<\/p>\n<p>Researchers have now shown an AI system working only from public, pseudonymous posts — no hacking, no private data, no leak — putting real names to accounts. It matched what would take a skilled human investigator hours, and when it committed to an answer it was right about nine times in ten. Datasets released years ago as safely anonymised were released under an assumption that no longer holds.<\/p>\n<p>Some of this cannot be undone. You can change a leaked password. You cannot change your DNA — and a relative's home DNA test exposes you, and your children, without anyone asking them.<\/p>", "o": "<p>Data protection law asks whether data is adequately protected <em>now<\/em>. It does not ask whether it will still be safe in fifteen years against systems that do not exist yet.<\/p><p>There is a precedent for doing better: banks and governments are already replacing their encryption to protect today's data against future quantum computers, on exactly this reasoning. Nobody is doing the equivalent for future AI.<\/p>"}, "R13": {"t": "AI banned in theory, but not in practice", "b": "<p>The EU's AI Act bans live facial recognition in public places for law enforcement. Then it lists the exceptions: searching for victims of abduction or trafficking, missing people, an imminent threat to life, a genuine terrorist threat, and identifying suspects for offences carrying four years or more. Each permitted use needs prior authorisation from a judge or an independent authority, which is a real constraint and worth saying. A separate clause then exempts anything done for military, defence or national security purposes from the Act entirely.<\/p>\n<p>Civil society groups argue the exceptions swallow the rule, and that the national-security clause is the real hole — because what counts as a security matter is decided by the same authorities who want to use the tool. Statewatch's warning is blunt: climate demonstrations and political protests could be targeted with AI surveillance if police frame them as national security concerns.<\/p>\n<p><strong>The UK has neither the ban nor the exceptions, because it has no AI law at all.<\/strong> Police here use live facial recognition under common law, codes of practice and a 2020 Court of Appeal ruling. Parliament's own research service states plainly that there is \"no primary legislation specific to\" the technology and how police should use it. Thirteen of 43 forces in England and Wales now use it. The Home Office funded 40 new vans in January 2026. The first permanent cameras went up in south London in October 2025. In 2024 the Met scanned 4.6 million faces and reported 962 arrests. A Home Office consultation on a legal framework closed in February 2026.<\/p>\n<p>The people most affected are the ones whose activity gets classified as a security question: protesters, journalists, migrants, minority communities.<\/p>", "o": "<p>Export controls — the Wassenaar Arrangement and its national equivalents — do not meaningfully cover AI surveillance systems. So a tool a democracy restricts at home can be sold to a state that will not restrict it at all.<\/p><p>Before AI, surveillance was limited by three things: cost, scale, and the number of analysts available to read it. AI removes all three at once.<\/p>"}, "R16": {"t": "Political propaganda corrupting chatbot answers", "b": "<p>AI assistants answer by drawing on text scraped from the open web. So one way to change what millions of people get told is to write the web.<\/p>\n<p>A Moscow-based network called Pravda has published thousands of articles built less for human readers than for the crawlers that feed AI systems — around 40% of them aimed at Australia in the run-up to its May 2025 election. NewsGuard, commissioned by the ABC, put ten known false narratives to ten leading chatbots in three different framings, producing 300 responses. Fifty of them — <strong>16.6%<\/strong> — repeated the falsehood.<\/p>\n<p>Two honest caveats. That test was designed to find the weakness — the prompts included deliberately leading and adversarial ones — so it is not a measure of what an ordinary user gets. And the much-quoted claim that a third of AI worldwide has been \"infected\" is a boast by one of the operation's own participants, not a measurement.<\/p>\n<p>The direction still matters. Across six countries, weekly use of AI to look things up more than doubled in a year, from 11% to 24%, and is now the leading thing people use these tools for.<\/p>\n<p>What makes this attractive to an attacker is the cost. You do not need to reach the audience. You need to reach the crawler.<\/p>", "o": ""}, "R17": {"t": "AI penalising workers with caregiving duties", "b": "<p>On delivery and ride-hailing platforms, no manager decides who gets the good work. Software does, and it rewards a particular shape of availability: fast responses, long unbroken shifts, no cancellations, working at peak times.<\/p>\n<p>That is not a measure of how well someone does the job. It is a measure of how uninterruptible their life is. People with caring responsibilities — mostly women — can do the work perfectly and still watch their score, their allocation and their earnings drift downward, because they cannot be available on demand.<\/p>\n<p>A study of over a million US rideshare drivers found a gender earnings gap of roughly 7%, and traced it to three things — experience on the platform, driving speed, and where drivers lived — rather than to any decision by the platform to treat men and women differently. (Those are different factors from the availability scoring described above, so the study illustrates the shape of the problem rather than testing this particular mechanism.) That is the uncomfortable part: nobody has to intend an unequal outcome for it to happen, which also means nobody can be pointed at when it does.<\/p>\n<p>Unlike being refused a job, this is not a door closing. It is a gradual loss of standing with no moment you could appeal. Human Rights Watch's 2025 investigation of US platform work found workers typically do not know what a job pays until they have finished it, and that most platforms offer no real way to query a score.<\/p>", "o": "<p>UK courts have gone both ways. The Supreme Court ruled in 2021 that Uber drivers are workers entitled to the minimum wage and holiday pay. It ruled in 2023 that Deliveroo riders fall outside employment protection for collective bargaining, because riders may send a substitute. Employment status is being litigated clause by clause while the scoring carries on regardless.<\/p>"}, "R21": {"t": "Free knowledge being locked down", "b": "<p>A great deal of what is freely readable online is free because somebody chose to share it. That is now reversing, as publishers block AI crawlers, sue over training data, and put material behind paywalls to stop it being scraped.<\/p>\n<p>Between 2023 and 2024, restrictions spread to around 5% of the text in one of the standard training datasets — and to <strong>28% of the most actively maintained, highest-quality sources in it<\/strong>. News publishers have begun limiting what the Internet Archive can preserve. Open-licence organisations are reconsidering commitments they have held for twenty years.<\/p>\n<p>Two things follow, and the second is the less obvious one.<\/p>\n<p>Everybody loses access, not just AI companies. A student in Lagos or in Leeds who used open resources to fill a gap in their education finds fewer of them. That cost falls hardest on people who cannot pay the new price.<\/p>\n<p>And the only remaining way to get training data is to buy it. Copyright attaches automatically to almost everything anyone writes, so the licensing route creates a market in which only the largest publishers and the largest AI companies can participate. Protecting creators' work and entrenching an oligopoly turn out, here, to be the same action. That is a genuine dilemma rather than a villain, and it is why this risk is harder than it first looks.<\/p>", "o": ""}, "R22": {"t": "English-speaking AI eroding away minority languages and Indigenous ways of thinking", "b": "<p>There are roughly 7,000 living languages. A 2025 survey of digital infrastructure found <strong>33<\/strong> of them have full functionality across the platforms it examined. Around 1,500 have enough text online to train on at all. The rest have very little, including languages with millions of speakers.<\/p>\n<p>The worry is not only that some people cannot use these tools. It is that everyone gets routed through the few languages that work well.<\/p>\n<p>Languages carry ways of arguing, of being indirect, of showing respect, of organising a thought. If the assistant you use to write, learn, apply for things and work is fluent in English and clumsy in Yoruba or Welsh or Quechua, the English way of putting things quietly becomes the default — not by anyone deciding, but by friction. Minority languages already lack data, which makes building for them uneconomic, which produces less data.<\/p>\n<p>Countries under economic pressure to adopt AI for development have the least institutional room to ask what it costs culturally.<\/p>", "o": ""}}}</script>
 <script id="app">
 var APP_SRC=(document.currentScript&&document.currentScript.textContent)||'';
@@ -332,41 +842,61 @@ var DATA={core:{},supp:{}};try{DATA=JSON.parse(DATA_SRC);}catch(e){}
 var COPY={};try{COPY=JSON.parse((document.getElementById('copy')||{}).textContent||'{}')||{};}catch(e){COPY={};}
 var RESET=':root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}';
 
+
 /* ---------- every piece of text on the page, as first written ---------- */
 var DEF={
- 'mast.eyebrow':'Session 7 · Risk map review','mast.title':'What’s *missing*?','mast.cluster':'Our cluster','mast.none':'Not chosen yet','mast.sel':'Cluster',
- 'tab.choose':'Choose a cluster','tab.risks':'Our risks','tab.supp':'Supplementary risks','tab.record':'The record',
- 'ch.eyebrow':'Before you start','ch.q':'Which cluster is your room looking at?',
- 'ch.lead':'Each cluster is a group of risks from the risk map. You’ll read each risk, say it in your own words, note what it leaves out, and add anything missing.',
- 'ch.how':'Point at a cluster to see its risks. Click it to begin.','ch.howtap':'Tap a cluster to see its risks. Tap it again to begin.',
- 'hub.one':'1 risk','hub.many':'{n} risks',
- 'rk.of':'Risk {i} of {n}','rk.newn':'New risk +{n}','rk.something':'Something new','rk.untitled':'No title yet',
- 'rk.full':'Read the full description of this risk','rk.fullhide':'Hide the full description',
+ 'mast.title':'What’s *missing*?',
+ 'name.ph':'Your first name','name.ask':'What’s your first name?','name.save':'Save',
+ 'tab.setup':'Set up','tab.risks':'Our cluster','tab.supp':'Supplementary risks','tab.room':'Our room','tab.record':'The record','tab.rk':'Risk {i}','tab.new':'Something new',
+ 'tm.risk':'Risk {i}','tm.new':'Something new',
+ 'timer.start':'Start the timer','timer.pause':'Pause the timer','timer.resume':'Carry on with the timer','timer.reset':'Reset the timer','timer.done':'Time’s up','timer.min':'min','timer.about':'about {n} min',
+ 'present.on':'Presenting','present.tip':'Stops the movement and makes small text bigger, for sharing on Zoom.',
+ 'su.eyebrow':'Before you start','su.q':'Which room are you in?',
+ 'su.lead':'Your facilitator will tell you your room number. Each room looks at one cluster of risks from the risk map.',
+ 'su.how':'Point at a cluster on the map to see its rooms.','su.howtap':'Tap a cluster on the map to see its rooms.',
+ 'su.ex':'Show me an example','ex.note':'You’re in an example room, with five imaginary people.','ex.leave':'Leave the example','ex.room':'Example',
+ 'join.q':'And your name?','join.go':'Join room {n}','join.hint':'Your name goes on everything you add, so your room knows who said what.',
+ 'hub.rooms':'Rooms {a}–{b}','room.aria':'Room {n}: {c}','or.room':'Room {n}','or.ex':'Example room',
+ 'hub.one':'1 risk','hub.many':'{n} risks','rk.of':'Risk {i} of {n}','rk.something':'Something new?',
+ 'or.read':'Read it in full','or.done':'I’ve finished reading','or.ready':'Skip','or.close':'Close',
+ 'or.invite':'Click the risk to read it in full',
+ 'or.step1':'Step 1 — Read it in full','or.step2':'Step 2 — Answer these two questions',
+ 'w.q1':'Question 1','w.q2':'Question 2','w.others':'See what others in your room put',
+ 'or.change':'← Choose a different room',
+ 'w.own':'What would you put differently?','w.ownhint':'Say the risk in your own words. One wording each, and you can change yours.',
+ 'w.ownph':'Write it in your own words','w.ownadd':'Add my wording',
+ 'w.gap':'What is this description leaving out?','w.gaphint':'Is it covering the risk in full? Pick a label first if it helps.',
+ 'w.gapph':'Type a note, then press Enter','w.add':'Add','w.count':'{n} / 25 words','w.over':'Keep it to 25 words',
+ 'left.who':'Who it affects','left.day':'Day to day','left.narrow':'Made too narrow','left.other':'Other notes',
+ 'w.none':'Nothing from your room yet.',
+ 'nw.q':'Is there a risk in this cluster that isn’t on the map at all?',
+ 'nw.hint':'Check the Supplementary risks tab first. If it’s already there, add it here and say so.',
+ 'nw.t':'Give it a short title','nw.d':'In a sentence or two: what could go wrong, and who would it land on?','nw.add':'Add this risk',
+ 'nw.list':'New risks from your room','nw.starhint':'Give a heart to the ones you’d send to the whole House.',
+ 'ov.tag':'If there’s time','ov.q':'Did a risk from another cluster keep creeping into the conversation?','ov.hint':'Tap any that came up for you.',
+ 'nav.next':'Next risk','nav.new':'Something new','nav.room':'See our room',
+ 'pi.you':'You','pi.star':'Like this','pi.unstar':'Take your like off','pi.likes':'{n} likes','pi.remove':'Remove','pi.edit':'Edit your note',
+ 'room.q':'Our room','room.lead':'Everything your room has added, together. Hearts show what people agree with.',
+ 'room.all':'Everyone','room.me':'Me','room.words':'In our words','room.gaps':'What’s left out',
+ 'room.new':'New risks for the whole House','room.newhint':'Give a heart to the ones you think should go to the whole House. Most hearts first.',
+ 'room.creep':'Kept creeping in from other clusters','room.none':'Nothing yet.',
+ 'rc.q':'The record','rc.lead':'Everything your room added, as plain text, with names and hearts. Copy it into the room’s notes before you leave.',
+ 'rc.copy':'Copy the record','rc.copied':'Copied.','rc.select':'Select all and copy this text.',
+ 'need.q':'Choose your room first.','need.btn':'Set up',
  'gospel':'The team drafted these descriptions from the experts’ work. They’re a starting point, and you can change them.',
- 'arc.risk':'Risk {i}','arc.newn':'New risk +{n}','arc.something':'Something new','arc.next':'← Next risk','arc.add':'Add one','arc.another':'+ Add another','sc.back':'Go back',
- 'nav.back':'Back','nav.next':'Next risk','nav.new':'Something new','nav.record':'See the record','nav.prev':'Back',
- 'p1.tag':'Part 1 · In our words','p1.q':'Does the description match what you’d say? Would you put it differently?',
- 'p1.ph':'Type the room’s wording. Leave it empty if the description fits.','p1.saved':'Saved on this computer','p1.nosave':'Not saved on this computer. Copy the record before you close the page.',
- 'p2.tag':'Part 2 · What’s left out','p2.q':'What is this description leaving out?','p2.hint':'Click a label first if it helps, then type.',
- 'p2.ph':'Type what the room says, then press Enter','p2.add':'Add','p2.empty':'No notes yet.',
- 'left.1':'Who it affects','left.2':'What it looks like day to day','left.3':'What’s been made too narrow',
- 'p3.tag':'Part 3 · Something new','p3.q':'Is there a risk in this cluster that isn’t on the map at all?',
- 'p3.hint':'Check the Supplementary risks tab first. If it’s already there, the room is asking for it to come back.',
- 'p3.add':'Add a new risk','p3.list':'The room’s new risks',
- 'ov.tag':'If there’s time','ov.q':'Which risk from another cluster kept creeping into the conversation?','ov.hint':'Click any that came up. They go in the record.',
- 'nw.pill':'New risk from this room','nw.back':'Bring this back','nw.over':'Overlaps a risk on the map',
- 'nw.t':'Give it a short title','nw.d':'In a sentence or two: what could go wrong, and who would it land on?',
- 'nw.map':'Is it already on the map?','nw.maphint':'It might be one of the six supplementary risks, or a risk in another cluster.',
- 'nw.unchecked':'Not checked yet','nw.no':'No, it’s new','nw.ysup':'Yes, a supplementary risk','nw.yin':'Yes, in {c}',
- 'nw.vote':'Put it forward to the whole assembly?','nw.votehint':'Count the room’s reactions or chat.','v.y':'Yes','v.n':'No','v.u':'Unsure',
- 'nw.rm':'Remove this risk','nw.rmq':'Remove this risk and its votes?','nw.rmyes':'Remove','nw.rmno':'Keep it',
  'sp.eyebrow':'For reference','sp.q':'The supplementary risks',
  'sp.lead':'Six more risks from the risk map. They didn’t make the final 13, so they don’t sit in any cluster. Click a circle to read it.',
  'sp.rules':'Where the rules fall short',
- 'rc.q':'The record','rc.lead':'Everything the room changed, as plain text. Copy it into the room’s notes before you leave.',
- 'rc.copy':'Copy the record','rc.clear':'Clear this cluster','rc.copied':'Copied.','rc.select':'Select all and copy this text.',
- 'rc.warn':'This clears every note for {c} on this computer. Copy the record first if you need it.','rc.yes':'Clear and start again','rc.keep':'Keep the notes',
- 'need.q':'Choose your cluster first.','need.btn':'Choose a cluster'
+ 'help.title':'What makes something a risk?','help.btn':'What makes a risk?','help.back':'Back to the risk','help.backx':'Back','help.opened':'opened','help.closed':'closed',
+ 'help.alt':'Three overlapping circles labelled Hazard, Exposure and Vulnerability. Where all three overlap is labelled Risk.',
+ 'help.centre':'Harm happens where all three meet.','help.risk':'Risk',
+ 'help.haz':'Hazard','help.hazd':'The thing that could cause harm.',
+ 'help.exp':'Exposure','help.expd':'Who or what is in its path.','help.expx':'People, jobs, places, services, nature',
+ 'help.vul':'Vulnerability','help.vuld':'What makes some people or things more likely to be hurt, or less able to cope.',
+ 'todo.btn':'What to do','todo.title':'What to do','todo.close':'Close',
+ 'todo.lead':'{a} minutes for your risks, then {b} minutes for something new.','todo.lead1':'{a} minutes for your risk, then {b} minutes for something new.',
+ 'todo.new':'Add a risk that isn’t on the map yet.',
+ 'todo.do':'Click the risk and read it in full (or press *Skip* if you’ve read it).\nAnswer the two questions.\nTalk about your answers together.'
 };
 var CLUSTERS=[
  {id:'data',n:'Everyone with data',c:'#C0E8F8',r:['R06','R08']},
@@ -379,8 +909,13 @@ var CLUSTERS=[
 var CL={};CLUSTERS.forEach(function(c){CL[c.id]=c;DEF['cl.'+c.id]=c.n;});
 Object.keys(DATA.core).forEach(function(r){DEF['risk.'+r]=DATA.core[r].t;DEF['riskd.'+r]=DATA.core[r].d;});
 var SUPP=Object.keys(DATA.supp);SUPP.forEach(function(r){DEF['sup.'+r]=DATA.supp[r].t;});
-var HINTS={'mast.title':'*Asterisks* make a word bold.'};
-var MULTI={};
+var HINTS={'mast.title':'*Asterisks* make a word bold.','todo.do':'One step per line. *Asterisks* make words bold.'};
+var MULTI={'todo.do':1};
+/* rooms: the same tables as the iceberg, each room looks at one cluster */
+var NROOMS=26,ROOMC={};
+[[1,4,'data'],[5,8,'voters'],[9,12,'kids'],[13,14,'work'],[15,20,'war'],[21,26,'check']].forEach(function(a){for(var n=a[0];n<=a[1];n++)ROOMC[n]=a[2];});
+var ROOMSOF={};CLUSTERS.forEach(function(c){var ns=[];for(var n=1;n<=NROOMS;n++)if(ROOMC[n]===c.id)ns.push(n);ROOMSOF[c.id]=[ns[0],ns[ns.length-1]];});
+function clusterOfRisk(r){var x=CLUSTERS.filter(function(c){return c.r.indexOf(r)>=0;})[0];return x?x.id:'';}
 
 /* ---------- copy helpers ---------- */
 function has(k){return Object.prototype.hasOwnProperty.call(COPY,k);}
@@ -394,78 +929,272 @@ function el(tag,a,kids){var e=document.createElement(tag);if(a)for(var k in a){v
 function T(tag,k,a,v){var e=el(tag,a);e.setAttribute('data-copy',k);e.innerHTML=rich(k,v);return e;}
 function clamp(v,a,b){return v<a?a:(v>b?b:v);}
 function f1(v){return v.toFixed(1);}
-var REDUCE=!!(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches);
+var REDUCE=!!(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches),REDUCE0=REDUCE;
 var FINE=!!(window.matchMedia&&matchMedia('(hover: hover) and (pointer: fine)').matches);
 var SVGNS='http://www.w3.org/2000/svg';
 var ARR='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h13M13 6l6 6-6 6"/></svg>';
 var ARL='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H6M11 6l-6 6 6 6"/></svg>';
 var CHEV='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9.5 L12 15.5 L18 9.5"/></svg>';
 
-/* ---------- state, kept in this browser ---------- */
-var KEY='hotp-missing-v2';
-function blank(){return {c:'',tab:'choose',by:{},supp:SUPP[0]||'',i:{}};}
+/* ---------- this browser's place in the activity ---------- */
+var KEY='hotp-missing-v3';
+function blank(){return {room:'',ex:false,tab:'setup',i:{},read:{},oth:{},supp:SUPP[0]||'',filt:'',timer:{}};}
 var S;try{S=JSON.parse(localStorage.getItem(KEY)||'null');}catch(e){S=null;}
-if(!S||typeof S!=='object'||!S.by)S=blank();if(!S.i)S.i={};
+if(!S||typeof S!=='object'||!('tab' in S))S=blank();if(!S.i)S.i={};if(!S.read)S.read={};if(!S.oth||typeof S.oth!=='object')S.oth={};if(!S.timer||typeof S.timer!=='object')S.timer={};
 function save(){try{localStorage.setItem(KEY,JSON.stringify(S));return true;}catch(e){return false;}}
-function G(c){c=c||S.c;if(!S.by[c])S.by[c]={};var g=S.by[c];['own','gaps','draft'].forEach(function(k){if(!g[k])g[k]={};});if(!g.added)g.added=[];if(!g.over)g.over=[];return g;}
 function uid(){return Math.random().toString(36).slice(2,10);}
-function real(a){return !!((a.t||'').trim()||(a.d||'').trim());}
-function count(c){var g=S.by[c];if(!g)return 0;var n=0,k;for(k in g.own||{})if((g.own[k]||'').trim())n++;for(k in g.gaps||{})n+=(g.gaps[k]||[]).length;return n+(g.added||[]).filter(real).length+(g.over||[]).length;}
+function cid(){return S.ex?'voters':(ROOMC[S.room]||'');}
+function C(){return CL[cid()];}
+function roomLabel(){return S.ex?plain('or.ex'):plain('or.room',{n:S.room});}
+
+/* ---------- who you are: one name and id shared by all the HotP activities ---------- */
+var MEK='hotp-me',ME;try{ME=JSON.parse(localStorage.getItem(MEK)||'null');}catch(e){ME=null;}
+if(!ME||typeof ME!=='object')ME={};if(!ME.pid)ME.pid='p'+uid()+uid();if(typeof ME.name!=='string')ME.name='';
+function saveMe(){try{localStorage.setItem(MEK,JSON.stringify({name:ME.name,pid:ME.pid}));}catch(e){}}
+saveMe();
+function myName(){return (ME.name||'').trim();}
+
+/* ---------- the room: everyone's contributions (kept in this browser for now) ---------- */
+var RSK='hotp-missing-rooms-v1',RS;try{RS=JSON.parse(localStorage.getItem(RSK)||'null');}catch(e){RS=null;}
+if(!RS||typeof RS!=='object')RS={};
+function saveRS(){try{localStorage.setItem(RSK,JSON.stringify(RS));return true;}catch(e){return false;}}
+function emptyRoom(){return {people:{},order:[],words:{},gaps:{},news:[],creep:{}};}
+function rkey(){return S.ex?'ex':(ROOMC[S.room]?String(S.room):'');}
+function R(){
+  var k=rkey();if(!k)return null;
+  if(!RS[k])RS[k]=k==='ex'?exampleRoom():emptyRoom();
+  var r=RS[k];['people','words','gaps','creep'].forEach(function(x){if(!r[x]||typeof r[x]!=='object')r[x]={};});
+  if(!Array.isArray(r.order))r.order=[];if(!Array.isArray(r.news))r.news=[];
+  return r;
+}
+/* colours from the page palette, in the order people first add something */
+var PAL=['#F0E060','#C0E8F8','#E078B0','#E08850','#B868C0','#E06050','#E0C060','#DDF2FA'];
+function enter(r){if(r.order.indexOf(ME.pid)<0)r.order.push(ME.pid);r.people[ME.pid]={n:myName()};}
+function pcol(r,pid){var i=r.order.indexOf(pid);return i<0?'#DDF2FA':PAL[i%PAL.length];}
+function pname(r,pid){return pid===ME.pid?(myName()||plain('pi.you')):((r.people[pid]||{}).n||'Someone');}
+function stars(x){return x&&x.st?Object.keys(x.st).length:0;}
+function starredByMe(x){return !!(x&&x.st&&x.st[ME.pid]);}
+function nwords(t){return (t||'').trim().split(/\s+/).filter(Boolean).length;}
+function byStars(a,b){return stars(b)-stars(a)||(a.at||0)-(b.at||0);}
+function wordsOf(r,rid){if(!Array.isArray(r.words[rid]))r.words[rid]=[];return r.words[rid];}
+function gapsOf(r,rid){if(!Array.isArray(r.gaps[rid]))r.gaps[rid]=[];return r.gaps[rid];}
+function mineCount(){var r=R();if(!r)return 0;var n=0;Object.keys(r.words).forEach(function(k){n+=r.words[k].filter(function(x){return x.pid===ME.pid;}).length;});
+  Object.keys(r.gaps).forEach(function(k){n+=r.gaps[k].filter(function(x){return x.pid===ME.pid;}).length;});
+  n+=r.news.filter(function(x){return x.pid===ME.pid;}).length;return n;}
+
+/* ---------- the example room: five imaginary people, and you ---------- */
+function exampleRoom(){
+  var P={a:'Amara',d:'Dev',s:'Siobhan',t:'Tom',w:'Wen'},r=emptyRoom(),t0=Date.now()-3600e3,k=0;
+  r.order=['xa','xd','xs',ME.pid,'xt','xw'];
+  Object.keys(P).forEach(function(x){r.people['x'+x]={n:P[x]};});
+  r.people[ME.pid]={n:myName()};
+  function st(s){var o={};(s||'').split('').forEach(function(c){o[c==='y'?ME.pid:'x'+c]=1;});return o;}
+  function W(rid,p,t,s){wordsOf(r,rid).push({id:'xw'+(++k),pid:p==='y'?ME.pid:'x'+p,t:t,at:t0+k*60e3,st:st(s)});}
+  function N(rid,p,kind,t,s){gapsOf(r,rid).push({id:'xg'+(++k),pid:p==='y'?ME.pid:'x'+p,t:t,k:kind,at:t0+k*60e3,st:st(s)});}
+  W('R01','a','Companies use AI that is very good at changing our minds, to sell us things and shape what we think.','dtw');
+  W('R01','d','Chatbots can nudge your views without you noticing, and the companies behind them profit from it.','s');
+  W('R01','t','AI is being used to persuade people for profit, and we can’t easily tell when it’s happening.','');
+  N('R01','s','who','Older people and lonely people who chat to AI every day are the easiest to sway.','awy');
+  N('R01','w','day','Adverts slipped into homework help for kids.','t');
+  N('R01','t','narrow','It’s not only companies. Political groups could do this too.','da');
+  N('R01','d','','Who checks what the chatbot was told to push?','');
+  N('R01','y','who','People reading in their second language.','s');
+  W('R02','w','AI makes it easy to send thousands of fake letters, so councils and courts can be swamped.','as');
+  W('R02','s','Public consultations can be flooded with AI-written answers that drown out real people.','');
+  N('R02','a','day','My local planning meeting couldn’t tell which objections were real.','td');
+  N('R02','t','who','Small charities that can’t afford their own AI tools get drowned out.','w');
+  N('R02','d','narrow','Petitions and MPs’ inboxes too, not only consultations.','');
+  N('R02','w','','Real people stop bothering if they think nobody reads it.','ay');
+  r.news.push({id:'xn1',pid:'xd',t:'AI deciding what news we see',d:'News feeds run by AI could quietly decide which stories people see, and local news gets lost.',at:t0+40*60e3,st:st('atws')});
+  r.news.push({id:'xn2',pid:'xs',t:'Fake local voices',d:'AI pretending to be neighbours in community groups, stirring up arguments before elections.',at:t0+44*60e3,st:st('w')});
+  r.creep={R08:st('awd'),R03:st('s'),R14:st('td')};
+  return r;
+}
 
 /* ---------- the frame ---------- */
 $('root').innerHTML=
- '<header class="wrap"><div class="mast"><div class="t1"><span class="eyebrow" data-copy="mast.eyebrow" data-static></span><h1 data-copy="mast.title" data-static></h1></div>'+
- '<div class="t2"><span class="eyebrow" data-copy="mast.cluster" data-static></span><span class="rk" id="mclu"></span></div>'+
- '<div class="t3"><label for="csel" data-copy="mast.sel" data-static></label><select id="csel"></select></div></div></header>'+
- '<nav class="tabs wrap" aria-label="Sections"><ol role="tablist" id="tabs"></ol></nav>'+
- '<main class="wrap"><div id="view"></div></main>'+
+ '<header class="top"><div class="wrap"><h1 data-copy="mast.title" data-static></h1><div class="tpill" id="timer" hidden></div></div>'+
+ '<button type="button" id="present" role="switch" aria-checked="false"><i aria-hidden="true"></i></button></header>'+
+ '<nav class="tabs" aria-label="Parts of the activity"><div class="wrap"><ol id="tabs"></ol>'+
+ '<div class="todo" id="todo" hidden><button type="button" class="todob" id="todob" aria-expanded="false" aria-controls="todop"></button><div class="todop" id="todop" role="dialog" aria-labelledby="todoh" hidden></div></div></div></nav>'+
+ '<main class="wrap"><div id="exbar" hidden></div><div id="view"></div></main>'+
+ '<div id="askname" role="dialog" aria-labelledby="askq" hidden><label id="askq" for="askin" data-copy="name.ask" data-static></label>'+
+ '<div class="row"><input id="askin" maxlength="40" autocomplete="given-name" spellcheck="false"><button type="button" class="btn" id="askgo" data-copy="name.save" data-static></button></div>'+
+ '<p class="hint" data-copy="join.hint" data-static></p></div>'+
  '<div id="ed" role="dialog" aria-label="Edit this text" hidden><textarea id="edta" rows="3" aria-label="New wording"></textarea><p class="hint" id="edhint" hidden></p>'+
  '<div class="edacts"><button type="button" class="btn" id="edsave">Save</button><button type="button" class="btn l" id="edcancel">Cancel</button><button type="button" class="btn l" id="edreset">Back to the original</button><span class="hint">Enter saves · Esc cancels</span></div></div>'+
  '<div id="edbar" hidden><button type="button" id="edtoggle" aria-pressed="false">Edit text</button><span id="edtip" hidden>Click any text with a dashed outline to change it, buttons included.</span><span id="edstatus" hidden></span></div>';
-(function(){var s=$('csel');s.addEventListener('change',function(){if(CL[s.value]){S.c=s.value;if(S.tab==='choose')S.tab='risks';}else S.c='';save();render();});})();
-var TABS=['choose','risks','supp','record'];
+var TABS=['setup','risks','supp','room'];
 function paintStatic(){document.querySelectorAll('[data-static]').forEach(function(e){e.innerHTML=rich(e.getAttribute('data-copy'));});}
 function renderFrame(){
   paintStatic();
-  var c=CL[S.c],m=$('mclu');
-  if(c){m.setAttribute('data-copy','cl.'+c.id);m.innerHTML=rich('cl.'+c.id);}else{m.setAttribute('data-copy','mast.none');m.innerHTML=rich('mast.none');}
+  var c=C();
   document.documentElement.style.setProperty('--c',c?c.c:'#B868C0');
-  var s=$('csel');s.innerHTML='';s.appendChild(el('option',{value:'',text:'–'}));CLUSTERS.forEach(function(x){s.appendChild(el('option',{value:x.id,text:plain('cl.'+x.id)}));});s.value=S.c||'';
-  var ol=$('tabs');ol.innerHTML='';
-  TABS.forEach(function(t){
-    var b=el('button',{type:'button',role:'tab','aria-selected':String(S.tab===t),id:'tab-'+t,onclick:function(){go(t);}},[T('span','tab.'+t)]);
-    if(t==='risks'&&S.c){var n=count(S.c);if(n)b.appendChild(el('span',{cls:'n',text:String(n)}));}
-    ol.appendChild(el('li',{role:'presentation'},[b]));
-  });
+  $('askin').setAttribute('placeholder',plain('name.ph'));
+  renderTabs();renderTimer();renderPresent();renderTodo();
+  var eb=$('exbar');eb.hidden=!S.ex;
+  if(S.ex){eb.innerHTML='';eb.appendChild(T('span','ex.note'));eb.appendChild(T('button','ex.leave',{type:'button',onclick:leaveExample}));}
 }
-function go(t){S.tab=t;save();render();var tb=document.querySelector('.tabs');if(tb&&window.scrollY>tb.offsetTop)window.scrollTo({top:tb.offsetTop,behavior:'auto'});}
+/* the tab bar: Our cluster is most of the activity, so it opens out into its risks while you are in it, and folds back to its name when you are elsewhere */
+var NAVOPEN=false,NAVWAS=null;
+var CHEVR='<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M9.5 6 L15.5 12 L9.5 18"/></svg>';
+function renderTabs(){
+  var ol=$('tabs');ol.innerHTML='';var c=C();
+  function one(t){var b=el('button',{type:'button',id:'tab-'+t,onclick:function(){go(t);}},[T('span','tab.'+t)]);if(S.tab===t)b.setAttribute('aria-current','page');ol.appendChild(el('li',{cls:'one'},[b]));}
+  one('setup');
+  var here=S.tab==='risks',open=!!c&&(here||NAVOPEN),L=c?slides():[],i=c?curI():0;
+  var li=el('li',{cls:'grp'+(open?' open':'')+(here?' here':'')});
+  var gh=el('button',{type:'button',cls:'gh',id:'tab-risks','aria-expanded':String(open),'aria-controls':'subs-risks',onclick:function(){if(!open&&c){NAVOPEN=true;renderTabs();var f=document.querySelector('#subs-risks button');if(f)try{f.focus({preventScroll:true});}catch(e){}}else go('risks');}},
+    [T('span','tab.risks'),c&&!open?el('i',{cls:'gchev','aria-hidden':'true',html:CHEVR}):null]);
+  if(here&&!open)gh.setAttribute('aria-current','page');
+  li.appendChild(gh);
+  var subs=el('div',{cls:'subs',id:'subs-risks'});
+  L.forEach(function(sl,k){
+    var b=el('button',{type:'button',tabindex:open?'0':'-1',onclick:function(){if(S.tab==='risks'&&RK)setSlide(k);else{S.i[cid()]=k;save();go('risks');}}},
+      [T('span',sl.k==='core'?'tab.rk':'tab.new',null,{i:k+1})]);
+    if(here&&k===i)b.setAttribute('aria-current','step');
+    subs.appendChild(b);
+  });
+  li.appendChild(subs);ol.appendChild(li);
+  one('supp');one('room');
+  /* the horizontal accordion: slide open or shut from where it was */
+  if(window.innerWidth<=760){subs.style.maxWidth='';}
+  else{
+    var full=subs.scrollWidth,to=open?full:0,from=(NAVWAS===null||NAVWAS===open)?to:(open?0:full);
+    subs.style.maxWidth=from+'px';
+    if(from!==to&&!REDUCE){void subs.offsetWidth;subs.style.maxWidth=to+'px';}else subs.style.maxWidth=to+'px';
+  }
+  NAVWAS=open;
+}
+/* ---------- timings: the risks share 40 minutes; something new has 40; each is half writing, half talking ---------- */
+var RISKSEC=40*60,NEWSEC=40*60,TICK=null;
+function partSec(sl){var c=C();return sl.k==='core'?Math.round(RISKSEC/(c?c.r.length:1)):NEWSEC;}
+function fmtMin(s){return s%60===0?(s/60)+' '+plain('timer.min'):plain('timer.about',{n:Math.round(s/60)});}
+function fmt(ms){var x=Math.ceil(ms/1000),m=Math.floor(x/60);x=x%60;return m+':'+(x<10?'0':'')+x;}
+function tKey(sl){return rkey()+'|'+sl.id;}
+function tState(sl){var k=tKey(sl);if(!S.timer[k])S.timer[k]={left:null,end:null};return S.timer[k];}
+function leftMs(sl){var t=tState(sl);if(t.end)return Math.max(0,t.end-Date.now());if(t.left!=null)return t.left;return partSec(sl)*1000;}
+/* the timer: a small pill in the header's top right, only while you are in Our cluster. Click it to start; click again to pause */
+var CLOCK='<svg viewBox="0 0 32 32" aria-hidden="true" focusable="false"><circle cx="16" cy="16" r="16" fill="#0A0A0A"/><circle cx="16" cy="16" r="10" fill="none" stroke="#fff" stroke-width="2.2"/><path d="M16 10.4V16l3.6 2.4" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+var RESETSVG='<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4.5 12a7.5 7.5 0 1 0 2.4-5.5"/><path d="M4.2 4.2v4.6h4.6"/></svg>';
+function renderTimer(){
+  var box=$('timer');if(!box)return;box.innerHTML='';clearInterval(TICK);
+  var c=C();
+  if(!c||S.tab!=='risks'){box.hidden=true;return;}
+  box.hidden=false;
+  var sl=slides()[curI()],t=tState(sl),left=leftMs(sl),running=!!t.end&&left>0,done=left<=0,fresh=!t.end&&t.left==null,sec=partSec(sl);
+  var lab=sl.k==='core'?plain('tm.risk',{i:curI()+1}):plain('tm.new');
+  var clk=el('span',{cls:'clk',id:'clk'});
+  if(done)clk.textContent=plain('timer.done');
+  else if(fresh){if(sec%60===0){clk.textContent=String(sec/60);clk.appendChild(el('small',{text:plain('timer.min')}));}else clk.textContent=fmt(sec*1000);}
+  else clk.textContent=fmt(left);
+  var act=done?'timer.reset':running?'timer.pause':(fresh?'timer.start':'timer.resume');
+  var b=el('button',{type:'button',id:'tbtn',cls:(running?'run':'')+(done?' done':''),title:plain(act),'aria-label':lab+': '+(done?plain('timer.done'):fresh?fmtMin(sec):fmt(left))+'. '+plain(act),onclick:function(){
+    if(done){t.end=null;t.left=null;}else if(running){t.left=leftMs(sl);t.end=null;}else{t.end=Date.now()+leftMs(sl);t.left=null;}save();renderTimer();try{$('tbtn').focus({preventScroll:true});}catch(e){}}});
+  b.innerHTML=CLOCK;b.appendChild(clk);
+  if(!fresh&&!done)box.appendChild(el('button',{type:'button',cls:'tre',title:plain('timer.reset'),'aria-label':plain('timer.reset'),html:RESETSVG,onclick:function(){t.end=null;t.left=null;save();renderTimer();}}));
+  box.appendChild(b);
+  if(running)TICK=setInterval(function(){var l=leftMs(sl),k=$('clk');if(l<=0){t.end=null;t.left=0;save();renderTimer();return;}if(k)k.textContent=fmt(l);},500);
+}
+/* presenting: Yaz's tiny switch in the header's corner. Stops the movement and makes small text bigger for screen sharing */
+var PRESENT=false;try{PRESENT=localStorage.getItem('hotp-missing-present')==='1';}catch(e){}
+document.documentElement.classList.toggle('present',PRESENT);if(PRESENT)REDUCE=true;
+function renderPresent(){var b=$('present');if(!b)return;b.setAttribute('aria-checked',String(PRESENT));b.setAttribute('aria-label',plain('present.on'));b.title=plain('present.tip');}
+$('present').addEventListener('click',function(){
+  PRESENT=!PRESENT;try{localStorage.setItem('hotp-missing-present',PRESENT?'1':'');}catch(e){}
+  document.documentElement.classList.toggle('present',PRESENT);REDUCE=REDUCE0||PRESENT;renderPresent();
+  if(CH)layoutChoose();if(RK){RK.tw++;drawOrbit();fillWS(false);}layoutSupp();
+});
+/* ---------- what to do: a white pill at the end of the tab bar (bottom right on a phone), only in Our cluster.
+   It opens a short note: the timings for this cluster's risks and something new, and the three steps ---------- */
+var TODO=false;
+function todoBody(){
+  var box=$('todop'),c=C();box.innerHTML='';if(!c)return;
+  box.appendChild(T('h3','todo.title',{id:'todoh'}));
+  box.appendChild(T('p',c.r.length===1?'todo.lead1':'todo.lead',{cls:'tdt'},{a:Math.round(RISKSEC/60),b:Math.round(NEWSEC/60)}));
+  var L=slides(),i=curI(),ul=el('ul',{cls:'tdparts'});
+  L.forEach(function(sl,k){
+    var li=el('li',{cls:k===i?'cur':''},[el('span',{cls:'tdn'},[T('b',sl.k==='core'?'tm.risk':'tm.new',null,{i:k+1}),el('span',{cls:'tdm',text:fmtMin(partSec(sl))})])]);
+    if(sl.k==='core')li.appendChild(el('span',{cls:'tds',text:plain('risk.'+sl.id)}));else li.appendChild(T('span','todo.new',{cls:'tds'}));
+    ul.appendChild(li);
+  });
+  box.appendChild(ul);
+  var ol=el('ol',{cls:'tddo','data-copy':'todo.do'});
+  raw('todo.do').split('\n').map(function(x){return x.trim();}).filter(Boolean).forEach(function(line){ol.appendChild(el('li',{html:esc(line).replace(/\*([^*\n]+)\*/g,'<b>$1</b>')}));});
+  box.appendChild(ol);
+  box.appendChild(el('button',{type:'button',cls:'tdx','aria-label':plain('todo.close'),text:'×',onclick:function(){TODO=false;renderTodo();try{$('todob').focus();}catch(e){}}}));
+}
+function renderTodo(){
+  var w=$('todo');if(!w)return;var on=S.tab==='risks'&&!!C(),tb=document.querySelector('.tabs');
+  w.hidden=!on;if(tb)tb.classList.toggle('hastodo',on);
+  if(!on){TODO=false;$('todop').hidden=true;return;}
+  var b=$('todob');b.innerHTML='<i aria-hidden="true">i</i>';b.appendChild(T('span','todo.btn'));
+  b.setAttribute('aria-expanded',String(TODO));w.classList.toggle('open',TODO);
+  $('todop').hidden=!TODO;if(TODO)todoBody();
+}
+$('todob').addEventListener('click',function(e){e.stopPropagation();TODO=!TODO;renderTodo();});
+document.addEventListener('click',function(e){if(TODO&&!(e.target.closest&&e.target.closest('#todo,#ed,#edbar'))){TODO=false;renderTodo();}});
+document.addEventListener('keydown',function(e){if(TODO&&e.key==='Escape'&&$('ed').hidden){e.stopPropagation();TODO=false;renderTodo();try{$('todob').focus();}catch(x){}}},true);
+function go(t){
+  if(XP.on)xpClose(true);
+  NAVOPEN=false;S.tab=t;save();render();
+  var tb=document.querySelector('.tabs');if(tb&&window.scrollY>tb.offsetTop)window.scrollTo({top:tb.offsetTop,behavior:'auto'});
+}
+/* your name: typed once on Set up, shown on everything you add */
+var RNT=null;
+function setName(v,from){
+  ME.name=String(v||'').slice(0,40);saveMe();
+  document.querySelectorAll('#askin,#joinname').forEach(function(i){if(i!==from&&i.value!==ME.name)i.value=ME.name;});
+  clearTimeout(RNT);RNT=setTimeout(function(){var r=R();if(r&&r.people[ME.pid]){r.people[ME.pid].n=myName();saveRS();}refresh();},500);
+}
+/* no name yet (the example room, or a room link): a small white box asks for it, once */
+var ASKF=null;
+function askName(f){
+  ASKF=typeof f==='function'?f:null;
+  var d=$('askname'),i=$('askin');d.hidden=false;i.value=ME.name;i.classList.remove('ask');void i.offsetWidth;i.classList.add('ask');
+  try{i.focus({preventScroll:true});}catch(e){}
+}
+function askDone(){var i=$('askin');if(!i.value.trim()){i.focus();return;}setName(i.value,i);$('askname').hidden=true;var f=ASKF;ASKF=null;if(f)f();}
+$('askgo').addEventListener('click',askDone);
+$('askin').addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();askDone();}else if(e.key==='Escape'){e.preventDefault();$('askname').hidden=true;ASKF=null;}});
+function needName(f){if(myName())return true;askName(f);return false;}
+function leaveExample(){S.ex=false;S.tab='setup';save();render();}
+function clearEx(){['read','oth','timer'].forEach(function(f){Object.keys(S[f]||{}).forEach(function(k){if(k.indexOf('ex|')===0)delete S[f][k];});});}
+function startExample(){RS.ex=exampleRoom();saveRS();clearEx();S.ex=true;S.i.voters=0;S.tab='risks';save();ENTER=true;render();}
 
-/* ---------- choose: the six clusters on the field, as on the risk map ---------- */
-/* where each cluster sits (share of the map) and the angle of each risk off it, in degrees, 0 = east, 90 = south */
+/* ---------- set up: which room are you in, on the cluster map ---------- */
 var PRE={
  W:{tg:.95,g:{voters:[.10,.03,[15,105]],check:[.90,.06,[175,125,80]],data:[.50,.40,[-100,30]],war:[.05,.62,[-35,25,95]],kids:[.40,.97,[-40,190]],work:[.94,.80,[200]]}},
  P:{tg:.62,g:{voters:[0,0,[25,100]],check:[1,.10,[195,150,95]],war:[.08,.47,[-30,25,95]],data:[.92,.55,[205,110]],kids:[.10,1,[-15,-100]],work:[.90,1,[-140]]}}
 };
-var CH=null,HOT=null;
-function vChoose(v){
+var CH=null,HOT=null,PICK='';
+function vSetup(v){
   var st=el('section',{cls:'stage ch','aria-labelledby':'chq'});
-  var intro=el('div',{cls:'intro'},[T('span','ch.eyebrow',{cls:'eyebrow'}),T('h2','ch.q',{cls:'q',id:'chq'}),T('p','ch.lead',{cls:'lead'}),T('p',FINE?'ch.how':'ch.howtap',{cls:'how'})]);
+  var grid=el('div',{cls:'rgrid',role:'group','aria-labelledby':'chq'});
+  for(var n=1;n<=NROOMS;n++)(function(n){
+    var c=CL[ROOMC[n]],on=!S.ex&&String(S.room)===String(n);
+    var b=el('button',{type:'button',cls:'rb','aria-pressed':String(on),'aria-label':plain('room.aria',{n:n,c:plain('cl.'+c.id)}),text:String(n),onclick:function(){pickRoom(n);}});
+    b.style.setProperty('--c',c.c);
+    b.addEventListener('mouseenter',function(){hot(c.id);});b.addEventListener('mouseleave',function(){hot(PICK?ROOMC[PICK]:null);});
+    b.addEventListener('focus',function(){hot(c.id);});
+    grid.appendChild(b);
+  })(n);
+  var join=el('div',{cls:'join',id:'stjoin',hidden:'true'});
+  var intro=el('div',{cls:'intro'},[T('span','su.eyebrow',{cls:'eyebrow'}),T('h2','su.q',{cls:'q',id:'chq'}),T('p','su.lead',{cls:'lead'}),grid,join,
+    T('button','su.ex',{type:'button',cls:'exlink',onclick:startExample}),T('p',FINE?'su.how':'su.howtap',{cls:'how'})]);
   var map=el('div',{cls:'map'});
   var svg=document.createElementNS(SVGNS,'svg');svg.setAttribute('class','teth');svg.setAttribute('aria-hidden','true');map.appendChild(svg);
   CH={st:st,intro:intro,map:map,svg:svg,hubs:[],sats:[]};
   CLUSTERS.forEach(function(c){
-    var n=c.r.length;
-    var b=el('button',{type:'button',cls:'node hub','data-c':c.id,'aria-pressed':String(S.c===c.id)},[el('span',{cls:'hin'},[T('span','cl.'+c.id,{cls:'hn'}),T('span',n===1?'hub.one':'hub.many',{cls:'hk'},{n:n})])]);
+    var rr=ROOMSOF[c.id];
+    var b=el('button',{type:'button',cls:'node hub','data-c':c.id,tabindex:'-1','aria-hidden':'true'},[el('span',{cls:'hin'},[T('span','cl.'+c.id,{cls:'hn'}),T('span','hub.rooms',{cls:'hk'},{a:rr[0],b:rr[1]})])]);
     b.style.setProperty('--c',c.c);
-    b.setAttribute('aria-label',plain('cl.'+c.id)+'. '+c.r.map(function(r){return plain('risk.'+r);}).join('; '));
-    b.addEventListener('click',function(){if(!FINE&&HOT!==c.id){hot(c.id);return;}pickCluster(c.id);});
-    if(FINE){b.addEventListener('mouseenter',function(){hot(c.id);});b.addEventListener('mouseleave',function(){hot(null);});
-    b.addEventListener('focus',function(){hot(c.id);});b.addEventListener('blur',function(){hot(null);});}
+    b.addEventListener('click',function(){if(!FINE&&HOT!==c.id){hot(c.id);return;}pickRoom(ROOMC[PICK]===c.id?PICK:rr[0]);});
+    if(FINE){b.addEventListener('mouseenter',function(){hot(c.id);});b.addEventListener('mouseleave',function(){hot(PICK?ROOMC[PICK]:null);});}
     var H={c:c,el:b,x:0,y:0,r:0};CH.hubs.push(H);
     c.r.forEach(function(r){
       var s=el('span',{cls:'node sat','data-c':c.id,'aria-hidden':'true'});s.style.setProperty('--c',c.c);
-      s.addEventListener('click',function(){if(!FINE&&HOT!==c.id){hot(c.id);return;}pickCluster(c.id);});
-      if(FINE){s.addEventListener('mouseenter',function(){hot(c.id);});s.addEventListener('mouseleave',function(){hot(null);});}
+      if(FINE){s.addEventListener('mouseenter',function(){hot(c.id);});s.addEventListener('mouseleave',function(){hot(PICK?ROOMC[PICK]:null);});}
       var lab=el('div',{cls:'lab','data-c':c.id,'aria-hidden':'true'},[T('span','risk.'+r)]);
       var p=document.createElementNS(SVGNS,'path');p.setAttribute('data-c',c.id);p.style.setProperty('--c',c.c);svg.appendChild(p);
       CH.sats.push({h:H,r:r,el:s,lab:lab,path:p,x:0,y:0,rr:0});
@@ -475,14 +1204,9 @@ function vChoose(v){
   });
   st.appendChild(intro);st.appendChild(map);v.appendChild(st);
   layoutChoose();
-  if(RETURN&&CL[RETURN]){
-    var H=CH.hubs.filter(function(x){return x.c.id===RETURN;})[0];RETURN=null;
-    var sr=st.getBoundingClientRect(),hr=H.el.getBoundingClientRect(),wide=sr.width>=900,R2=clamp((wide?sr.width/2:sr.width)*.25,78,150);
-    var tx=sr.left+R2*.40,ty=sr.top+R2*.40,cx=hr.left+hr.width/2,cy=hr.top+hr.height/2;
-    H.el.style.transition='none';H.el.style.transform='translate('+f1(tx-cx)+'px,'+f1(ty-cy)+'px) scale('+(R2/H.r).toFixed(3)+')';
-    map.classList.add('zoom');intro.classList.add('zoom');H.el.classList.add('chosen');void H.el.offsetWidth;
-    requestAnimationFrame(function(){H.el.style.transition='';H.el.style.transform='';H.el.classList.remove('chosen');map.classList.remove('zoom');intro.classList.remove('zoom');});
-  }
+  PICK='';if(!S.ex&&ROOMC[S.room]){PICK=S.room;hot(ROOMC[S.room]);}
+  paintJoin();
+  if(PICK&&!myName())setTimeout(function(){var jb=$('stjoin');if(!jb||jb.hidden)return;var jr=jb.getBoundingClientRect();if(jr.bottom>window.innerHeight-90)jb.scrollIntoView({block:'center',behavior:'auto'});},60);
 }
 function hot(id){
   if(!CH||CH.map.classList.contains('zoom'))return;HOT=id;
@@ -513,316 +1237,590 @@ function layoutChoose(){
     var H=q.h,dx=q.x-H.x,dy=q.y-H.y,a=Math.atan2(dy,dx),p0x=H.x+H.r*Math.cos(a),p0y=H.y+H.r*Math.sin(a),p3x=q.x-q.rr*Math.cos(a),p3y=q.y-q.rr*Math.sin(a),bend=(CH.sats.indexOf(q)%2?1:-1)*14;
     var mx=(p0x+p3x)/2-Math.sin(a)*bend,my=(p0y+p3y)/2+Math.cos(a)*bend;
     q.path.setAttribute('d','M'+f1(p0x)+' '+f1(p0y)+'Q'+f1(mx)+' '+f1(my)+' '+f1(p3x)+' '+f1(p3y));
-    var lw=Math.min(220,q.lab.offsetWidth||200),lh=q.lab.offsetHeight||40,lx=q.x>=H.x?q.x+q.rr+10:q.x-q.rr-10-lw;
-    q.lab.style.left=f1(clamp(lx,6,W-lw-6))+'px';q.lab.style.top=f1(clamp(q.y-lh/2,6,Hh-lh-6))+'px';
+  });
+  placeLabels(W,Hh);
+}
+/* each risk's name sits beside its own circle, never on top of it: try the side away from the cluster, then the other side,
+   then below, then above (narrower if it must), and keep the place that covers its own circle, its cluster and its neighbours least */
+function placeLabels(W,Hh){
+  var done=[];
+  function hit(c,o){var nx=clamp(o.x,c.x,c.x+c.w),ny=clamp(o.y,c.y,c.y+c.h);return Math.max(0,o.r+4-Math.hypot(nx-o.x,ny-o.y));}
+  CH.sats.forEach(function(q){
+    var H=q.h,lab=q.lab,g=9,away=q.x>=H.x,cands=[];
+    var obs=[{x:H.x,y:H.y,r:H.r,w:3}];
+    CH.sats.forEach(function(s){if(s!==q)obs.push({x:s.x,y:s.y,r:s.rr,w:s.h===H?3:.15});});
+    CH.hubs.forEach(function(h){if(h!==H)obs.push({x:h.x,y:h.y,r:h.r,w:.15});});
+    function size(mw){lab.style.maxWidth=mw+'px';return {w:lab.offsetWidth||mw,h:lab.offsetHeight||40};}
+    function add(x,y,m,mw,al,pri){cands.push({x:clamp(x,6,Math.max(6,W-m.w-6)),y:clamp(y,6,Math.max(6,Hh-m.h-6)),w:m.w,h:m.h,mw:mw,al:al,pri:pri});}
+    function side(r,pri){var room=r?W-6-(q.x+q.rr+g):q.x-q.rr-g-6,mw=Math.min(220,Math.floor(room));if(mw<90)return;var m=size(mw);add(r?q.x+q.rr+g:q.x-q.rr-g-m.w,q.y-m.h/2,m,mw,r?'left':'right',pri+(220-mw)*.04);}
+    function vert(dn,pri){var mw=Math.min(220,W-12),m=size(mw);add(q.x-m.w/2,dn?q.y+q.rr+g-2:q.y-q.rr-g+2-m.h,m,mw,'center',pri);}
+    side(away,0);side(!away,.5);vert(true,1);vert(false,1.5);
+    var best=null;
+    cands.forEach(function(c){
+      var p=hit(c,{x:q.x,y:q.y,r:q.rr})*100+c.pri;
+      obs.forEach(function(o){p+=hit(c,o)*o.w;});
+      done.forEach(function(d){if(d.cl!==H)return;var ox=Math.max(0,Math.min(c.x+c.w,d.x+d.w)-Math.max(c.x,d.x)),oy=Math.max(0,Math.min(c.y+c.h,d.y+d.h)-Math.max(c.y,d.y));p+=ox*oy*.2;});
+      if(!best||p<best.p){best=c;best.p=p;}
+    });
+    if(!best)return;
+    lab.style.maxWidth=best.mw+'px';lab.style.textAlign=best.al;lab.style.left=f1(best.x)+'px';lab.style.top=f1(best.y)+'px';
+    done.push({x:best.x,y:best.y,w:best.w,h:best.h,cl:H});
   });
 }
-/* the chosen cluster grows into the corner where Our risks keeps it, the rest leave, then Our risks opens */
+/* picking a room: it lights its cluster, then asks for your name */
+function pickRoom(n){
+  if(!CH||CH.map.classList.contains('zoom'))return;
+  PICK=n;CH.intro.querySelectorAll('.rb').forEach(function(b){b.setAttribute('aria-pressed',String(b.textContent===String(n)));});
+  hot(ROOMC[n]);paintJoin();
+  var j=$('joinname');if(j)try{j.focus({preventScroll:true});j.select();}catch(e){}
+  var jb=$('stjoin');if(jb){var jr=jb.getBoundingClientRect();if(window.innerWidth<900||jr.bottom>window.innerHeight-90)jb.scrollIntoView({block:'center',behavior:REDUCE?'auto':'smooth'});}
+}
+function paintJoin(){
+  var j=$('stjoin');if(!j)return;j.innerHTML='';j.hidden=!PICK;if(!PICK)return;
+  var inp=el('input',{id:'joinname',maxlength:'40',autocomplete:'given-name',spellcheck:'false',placeholder:plain('name.ph')});inp.value=ME.name;
+  var btn=el('button',{type:'button',cls:'gobtn',onclick:goOn},[el('span',{text:plain('join.go',{n:PICK})}),el('i',{html:ARR})]);
+  function goOn(){if(!myName()){inp.classList.remove('ask');void inp.offsetWidth;inp.classList.add('ask');inp.focus();return;}joinRoom(PICK);}
+  inp.addEventListener('input',function(){setName(inp.value,inp);});
+  inp.addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();goOn();}});
+  j.appendChild(el('label',{'for':'joinname',cls:'jq',text:plain('join.q')}));
+  j.appendChild(el('div',{cls:'row'},[inp,btn]));
+  j.appendChild(el('p',{cls:'hint',text:plain('join.hint')}));
+}
+/* joining: the chosen cluster glides slowly to the corner it keeps in Our risks, then its risks come out of it */
 var ENTER=false;
-function pickCluster(cid){
-  if(!CL[cid])return;
-  S.c=cid;if(S.i[cid]==null)S.i[cid]=0;save();
-  if(REDUCE||!CH){ENTER=false;go('risks');return;}
-  var H=CH.hubs.filter(function(x){return x.c.id===cid;})[0],sr=CH.st.getBoundingClientRect(),hr=H.el.getBoundingClientRect();
-  var wide=sr.width>=900,sceneW=wide?sr.width/2:sr.width,R2=clamp(sceneW*.25,78,150);
-  var tx=sr.left+R2*.40,ty=sr.top+R2*.40,cx=hr.left+hr.width/2,cy=hr.top+hr.height/2,s=R2/H.r;
+function joinRoom(n){
+  var was=S.room;S.room=String(n);S.ex=false;if(S.i[cid()]==null)S.i[cid()]=0;save();
+  try{history.replaceState(null,'',location.pathname+location.search+'#g'+n);}catch(e){}
+  if(REDUCE||!CH){ENTER=true;go('risks');return;}
+  var H=CH.hubs.filter(function(x){return x.c.id===ROOMC[n];})[0],sr=CH.st.getBoundingClientRect(),hr=H.el.getBoundingClientRect();
+  var g=orbGeo(sr.width,stageH(sr.width)),tx=sr.left+g.hx,ty=sr.top+g.hy,cx=hr.left+hr.width/2,cy=hr.top+hr.height/2,s=g.Rh/H.r;
   hot(null);CH.map.classList.add('zoom');CH.intro.classList.add('zoom');H.el.classList.add('chosen');
   H.el.style.transform='translate('+f1(tx-cx)+'px,'+f1(ty-cy)+'px) scale('+s.toFixed(3)+')';
-  setTimeout(function(){ENTER=true;go('risks');},900);
+  setTimeout(function(){ENTER=true;go('risks');},1300);
+}
+function needRoom(v){
+  v.appendChild(el('section',{cls:'stage need'},[T('h2','need.q',{cls:'q'}),el('button',{type:'button',cls:'gobtn',onclick:function(){go('setup');}},[T('span','need.btn'),el('i',{html:ARR})])]));
 }
 
-/* back to the map: the scene fades, then the cluster eases out of the corner to its place among the others */
-var RETURN=null;
-function backToMap(){
-  if(REDUCE||!RK){go('choose');return;}
-  RK.st.classList.add('leaving');RETURN=S.c;
-  setTimeout(function(){go('choose');},260);
+/* ---------- our risks: a zoomed-in corner of the map. the cluster is large in the top left, its risks hang off it on lines ---------- */
+function slides(){var c=C();return c.r.map(function(r){return {k:'core',id:r};}).concat([{k:'new',id:'+'}]);}
+function curI(){var L=slides(),i=S.i[cid()]||0;return clamp(i,0,L.length-1);}
+function slideTitle(sl){return sl.k==='core'?plain('risk.'+sl.id):plain('rk.something');}
+function readKey(sl){return rkey()+'|'+sl.id;}
+var RK=null,KIND={},DRAFT={},EASE=function(k){return k<.5?4*k*k*k:1-Math.pow(-2*k+2,3)/2;};
+function NARROW(){return window.innerWidth<900;}
+/* the geometry: hub (cluster) mostly off the top-left edge and always larger than any risk */
+function orbGeo(W,H){
+  var nar=NARROW(),Wl=nar?W:W*.53;
+  var Rh=nar?clamp(W*.44,130,190):clamp(Math.min(W*.25,H*.46),200,360);
+  var hx=Rh*(nar?.1:.1),hy=Rh*(nar?.02:.02),gap=nar?30:Math.max(50,Rh*.2),th=(nar?60:50)*Math.PI/180,co=Math.cos(th),si=Math.sin(th);
+  var Rb=Math.min((Wl-(nar?10:Math.max(64,W*.045))-hx-(Rh+gap)*co)/(1+co),nar?9999:(H-30-hy-(Rh+gap)*si)/(1+si),Rh*.84);
+  Rb=Math.max(nar?96:120,Rb);
+  var Rs=nar?18:clamp(Rb*.13,21,28),dB=Rh+gap+Rb,dS=Rh+gap*1.2+Rs,bx=hx+dB*co,by=hy+dB*si,a1=.05;
+  for(;a1<1.6;a1+=.01){var x=hx+dS*Math.cos(th+(nar?-a1:a1)),y=hy+dS*Math.sin(th+(nar?-a1:a1));if(Math.hypot(x-bx,y-by)>=Rb+Rs+gap*.9)break;}
+  return {W:W,H:H,nar:nar,Wl:Wl,Rh:Rh,hx:hx,hy:hy,gap:gap,th:th,Rb:Rb,Rs:Rs,dB:dB,dS:dS,a1:a1,a2:2*Math.asin(Math.min(1,(Rs+14)/dS)),bx:bx,by:by};
 }
-/* ---------- our risks ---------- */
-function slides(){var c=CL[S.c],g=G();return c.r.map(function(r){return {k:'core',id:r};}).concat(g.added.map(function(a){return {k:'add',id:a.id,a:a};})).concat([{k:'new',id:'+'}]);}
-function curI(){var L=slides(),i=S.i[S.c]||0;return clamp(i,0,L.length-1);}
-function setSlide(i,focusPanel){var L=slides();i=clamp(i,0,L.length-1);if(i===curI()&&!focusPanel)return;
-  var tgt=L[i],g=G(),keep=g.added.filter(function(a){return real(a)||(tgt.k==='add'&&tgt.a===a);});
-  if(keep.length!==g.added.length){g.added=keep;L=slides();i=Math.max(0,L.indexOf(L.filter(function(x){return x.k===tgt.k&&x.id===tgt.id;})[0]));S.i[S.c]=i;save();renderRisks();}
-  else swapTo(i);
-  if(focusPanel)setTimeout(function(){var t=document.querySelector('.panel .band h2,.panel .ttl');if(t)try{t.focus({preventScroll:true});}catch(e){}},REDUCE?0:240);
-  var sc=document.querySelector('.rk');if(sc&&sc.getBoundingClientRect().top<0&&window.innerWidth<900)sc.scrollIntoView({block:'start'});}
-var RK=null,OPEN={},KIND={},CONF={};
+function stageH(W){
+  if(NARROW()){var g=orbGeo(W,9999);return Math.ceil(g.by+g.Rb+26);}
+  var vw=$('view'),top0=vw?vw.getBoundingClientRect().top+window.scrollY:140;
+  return clamp(window.innerHeight-Math.max(46,top0),520,900);
+}
+function orbPos(g,j){if(j===0)return {a:g.th,d:g.dB,r:g.Rb,o:1};var s=(j>0?1:-1)*(g.nar?-1:1),a=g.th+s*(g.a1+(Math.abs(j)-1)*g.a2);return {a:a,d:g.dS,r:g.Rs,o:(a<-.75||a>2.7)?0:1};}
+/* reading: the risk grows where it is, and the others make room.
+   On a computer the page scrolls so the risk can use the whole screen under the tab bar, so most descriptions fit without scrolling inside the circle */
+function navH(){var tb=document.querySelector('.tabs');return tb?tb.offsetHeight:46;}
+function readH(){var g=RK.g;if(g.nar)return g.H;return Math.max(g.H,window.innerHeight-navH());}
+function readGeo(){
+  var g=RK.g;if(g.nar){var r0=g.W/2-6;return {x:g.W/2,y:clamp(g.by,r0+8,Math.max(r0+8,g.H-r0-8)),r:r0};}
+  var H=RK.rh||g.H,re=Math.min((H-30)/2,g.W*.33);return {x:clamp(g.bx+re*.2,re+16,g.W*.64),y:clamp(H/2+2,re+12,H-re-12),r:re};
+}
+function setOrbH(h){if(!RK)return;RK.orb.style.height=h+'px';RK.st.style.setProperty('--H',h+'px');}
+function targets(i,reading){
+  var g=RK.g,T=RK.items.map(function(it,k){var p=orbPos(g,k-i);return {x:g.hx+p.d*Math.cos(p.a),y:g.hy+p.d*Math.sin(p.a),r:p.r,o:p.o};});
+  if(reading){var e=readGeo();T[i]={x:e.x,y:e.y,r:e.r,o:1};
+    for(var it=0;it<40;it++){T.forEach(function(t,k){if(k===i)return;var dx=t.x-e.x,dy=t.y-e.y,dd=Math.hypot(dx,dy)||1,need=e.r+t.r+18;if(dd<need){t.x=e.x+dx/dd*need;t.y=e.y+dy/dd*need;}});
+      T.forEach(function(a,k){if(k===i)return;T.forEach(function(b,m){if(m<=k||m===i)return;var dx=b.x-a.x,dy=b.y-a.y,dd=Math.hypot(dx,dy)||.01,need=a.r+b.r+12;if(dd<need){var p=(need-dd)/2;a.x-=dx/dd*p;a.y-=dy/dd*p;b.x+=dx/dd*p;b.y+=dy/dd*p;}});});}}
+  return T;
+}
+
 function vRisks(v){
-  if(!S.c){needCluster(v);return;}
-  var st=el('section',{cls:'stage rk'+(ENTER?' enter':''),'aria-label':plain('tab.risks')});
-  var scene=el('div',{cls:'scene'+(ENTER?' enter':'')});
-  var pcol=el('div',{cls:'pcol'});
-  st.appendChild(scene);st.appendChild(pcol);v.appendChild(st);
-  RK={st:st,scene:scene,pcol:pcol,tok:0};
-  renderRisks();
-  if(ENTER){setTimeout(function(){st.classList.remove('enter');scene.classList.remove('enter');},1600);ENTER=false;}
+  if(!cid()){needRoom(v);return;}
+  var c=C();
+  var st=el('section',{cls:'stage or','aria-label':plain('tab.risks')});st.style.setProperty('--c',c.c);
+  var orb=el('div',{cls:'orb'}),ws=el('div',{cls:'ws',id:'ws'}),sn=el('div',{cls:'stepn'});
+  st.appendChild(sn);st.appendChild(orb);st.appendChild(ws);v.appendChild(st);
+  RK={st:st,orb:orb,ws:ws,sn:sn,items:[],tw:0,reading:false};
+  drawOrbit();fillWS();
+  if(ENTER){ENTER=false;orbEnter();}
 }
-function renderRisks(){
-  if(!RK)return;var L=slides(),i=curI();
-  drawScene(L,i);
-  RK.pcol.innerHTML='';RK.pcol.appendChild(panel(L,i,L[i]));
-  renderFrame();
-}
-function slideTitle(sl,i){
-  if(sl.k==='core')return plain('risk.'+sl.id);
-  if(sl.k==='add')return (sl.a.t||'').trim()||plain('rk.untitled');
-  return plain('rk.something');
-}
-/* the scene: the cluster in the corner, its risks round it, the current risk as a big circle, and a curved line of moves above */
-function drawScene(L,i){
-  var sc=RK.scene,c=CL[S.c];sc.innerHTML='';sc.style.setProperty('--c',c.c);
-  var W=sc.clientWidth||600,H=sc.clientHeight||600,narrow=W<560;
-  var R=clamp(W*.25,78,150),hx=R*.40,hy=R*.40;
-  var n=L.length,rs=clamp(W*.036,17,24),dist=R+Math.max(30,R*.42)+rs;
-  var step=n>1?Math.min(26,64/(n-1)):0,a0=47-step*(n-1)/2;
-  var pts=L.map(function(s,k){var a=(a0+step*k)*Math.PI/180;return {x:hx+dist*Math.cos(a),y:hy+dist*Math.sin(a),a:a};});
-  var fs0=narrow?12:13.5,Ra=dist+rs+8+fs0*.8,A0=(a0-34)*Math.PI/180,A1=(a0+step*(n-1)+40)*Math.PI/180;
-  var guard=pts.slice();for(var d=Math.max(A0,-.3);d<=Math.min(A1,1.9);d+=.17)guard.push({x:hx+Ra*Math.cos(d),y:hy+Ra*Math.sin(d)});
-  var F,fx,fy;
-  if(narrow){F=Math.min((W-40)/2.2,150);fx=W/2+10;fy=H-F*1.06-26;}
-  else{F=clamp(Math.min(W*.36,H*.36),112,230);F=Math.min(F,(W-48)/2.12);fx=clamp(W*.6,F*1.06+24,W-F*1.06-24);fy=clamp(H*.62,F+20,H-F*1.06-24);}
-  for(var t=0;t<60;t++){var ok=true;guard.forEach(function(p){var dx=p.x-fx,dy=p.y-fy;if(Math.sqrt(dx*dx+dy*dy)<F*1.06+16)ok=false;});if(ok)break;
-    if(!narrow&&t<20){fy=Math.min(H-F*1.06-24,fy+6);fx=Math.min(W-F*1.06-24,fx+4);}else{F=Math.max(84,F-3);fx=narrow?fx:Math.min(W-F*1.06-24,fx+1);fy=Math.min(H-F*1.06-24,fy+2);}}
-  sc.style.setProperty('--F',f1(F)+'px');
-  var svg=document.createElementNS(SVGNS,'svg');svg.setAttribute('aria-hidden','true');sc.appendChild(svg);
-  function path(d,cls){var q=document.createElementNS(SVGNS,'path');q.setAttribute('d',d);if(cls)q.setAttribute('class',cls);svg.appendChild(q);return q;}
-  pts.forEach(function(q,k){
-    var a=q.a,x0=hx+R*Math.cos(a),y0=hy+R*Math.sin(a),x1=q.x-rs*Math.cos(a),y1=q.y-rs*Math.sin(a),b=(k%2?1:-1)*10,mx=(x0+x1)/2-Math.sin(a)*b,my=(y0+y1)/2+Math.cos(a)*b;
-    path('M'+f1(x0)+' '+f1(y0)+'Q'+f1(mx)+' '+f1(my)+' '+f1(x1)+' '+f1(y1),L[k].k==='core'?'':'add');
-  });
-  RK.geo={pts:pts,rs:rs,fx:fx,fy:fy,F:F,hx:hx,hy:hy,Ra:Ra,A0:A0,A1:A1,narrow:narrow,step:step*Math.PI/180};
-  RK.cur=path('','cur');setLine(i,1);
-  var hub=el('div',{cls:'chub','aria-hidden':'true'},[el('div',{cls:'in'},[T('span','cl.'+c.id,{cls:'hn'}),T('span',c.r.length===1?'hub.one':'hub.many',{cls:'hk'},{n:c.r.length})])]);
-  hub.style.width=hub.style.height=f1(2*R)+'px';hub.style.left=f1(hx-R)+'px';hub.style.top=f1(hy-R)+'px';
-  var inn=hub.firstChild;inn.style.left=f1(R*.98)+'px';inn.style.top=f1(R*1.0)+'px';inn.style.width=f1(R*.92)+'px';
-  sc.appendChild(hub);
-  RK.sms=[];var ai=0;
+function drawOrbit(){
+  var o=RK.orb,c=C(),L=slides(),i=curI();o.innerHTML='';
+  var W=RK.st.clientWidth||window.innerWidth-32,H=stageH(W);RK.st.style.setProperty('--H',H+'px');o.style.height=H+'px';
+  var g=orbGeo(W,H);RK.g=g;o.style.setProperty('--Rb',f1(g.Rb)+'px');o.classList.toggle('tight',g.Rb<185);
+  RK.rh=0;if(RK.reading&&!g.nar){RK.rh=readH();setOrbH(RK.rh);}
+  var lines=document.createElementNS(SVGNS,'svg');lines.setAttribute('class','lines');lines.setAttribute('aria-hidden','true');o.appendChild(lines);RK.lines=lines;
+  var hub=el('div',{cls:'ohub','aria-hidden':'true'},[el('div',{cls:'hin'},[el('span',{cls:'eyebrow',text:roomLabel()}),T('span','cl.'+c.id,{cls:'hn'}),T('span',c.r.length===1?'hub.one':'hub.many',{cls:'hk'},{n:c.r.length})])]);
+  hub.style.width=hub.style.height=f1(2*g.Rh)+'px';hub.style.left=f1(g.hx-g.Rh)+'px';hub.style.top=f1(g.hy-g.Rh)+'px';
+  var hin=hub.firstChild;hin.style.left=f1(g.Rh-g.hx+(g.nar?18:36))+'px';hin.style.top=f1(g.Rh-g.hy+(g.nar?18:34))+'px';hin.style.width=f1(g.Rh*(g.nar?.62:.56))+'px';
+  hin.style.fontSize=f1(clamp(g.Rh*.105,19,36))+'px';
+  o.appendChild(hub);RK.hub=hub;
+  RK.items=[];
   L.forEach(function(s,k){
-    var lab=s.k==='core'?String(k+1):s.k==='add'?'+'+(++ai):'+';
-    var b=el('button',{type:'button',cls:'sm'+(s.k==='core'?'':' add')+(s.k==='new'?' plus':''),'aria-current':String(k===i),'aria-label':slideTitle(s,k),title:slideTitle(s,k),text:lab,onclick:function(){setSlide(k);}});
-    b.style.setProperty('--k',k);b.style.width=b.style.height=f1(2*rs)+'px';b.style.left=f1(pts[k].x-rs)+'px';b.style.top=f1(pts[k].y-rs)+'px';
-    sc.appendChild(b);RK.sms.push(b);
+    var b=el('button',{type:'button',cls:'ob'+(s.k==='new'?' plus':''),'aria-label':slideTitle(s),title:slideTitle(s)});
+    b.appendChild(el('span',{cls:'sn','aria-hidden':'true',text:s.k==='core'?String(k+1):'+'}));
+    var bc=el('span',{cls:'bc'});
+    if(s.k==='core'){bc.appendChild(T('span','rk.of',{cls:'eyebrow'},{i:k+1,n:c.r.length}));bc.appendChild(T('span','risk.'+s.id,{cls:'h'}));bc.appendChild(T('span','riskd.'+s.id,{cls:'fd'}));bc.appendChild(el('span',{cls:'rd'},[T('span','or.read'),el('i',{'aria-hidden':'true',text:'+'})]));}
+    else{bc.appendChild(el('span',{cls:'plusmark','aria-hidden':'true',text:'+'}));bc.appendChild(T('span','rk.something',{cls:'h'}));}
+    b.appendChild(bc);
+    b.addEventListener('click',function(){if(k!==curI()){setSlide(k);return;}if(s.k==='core'&&!RK.reading)openRead();else if(s.k==='new'){var t=$('nt');if(t)try{t.focus();}catch(e){}}});
+    o.appendChild(b);
+    var full=null;
+    if(s.k==='core'){
+      full=el('div',{cls:'full',role:'region','aria-label':plain('risk.'+s.id)});
+      full.appendChild(el('button',{type:'button',cls:'fx','aria-label':plain('or.close'),text:'×',onclick:function(e){e.stopPropagation();closeRead();}}));
+      var sc=el('div',{cls:'fs',tabindex:'0'},[T('span','rk.of',{cls:'eyebrow'},{i:k+1,n:c.r.length}),T('h3','risk.'+s.id),el('div',{cls:'fbody',html:DATA.core[s.id].b}),
+        k===0?T('p','gospel',{cls:'gospel'}):null]);
+      full.appendChild(sc);full.appendChild(finBtn());o.appendChild(full);
+    }
+    var ln=document.createElementNS(SVGNS,'path');ln.setAttribute('class','ln');lines.appendChild(ln);
+    var it={el:b,full:full,s:s,ln:ln,k:k,a:0,d:0,r:0,o:1};RK.items.push(it);
   });
-  /* the curved line of moves, following the cluster circle */
-  var nav=document.createElementNS(SVGNS,'svg');nav.setAttribute('class','navarc');sc.appendChild(nav);
-  var arc=document.createElementNS(SVGNS,'path'),pid='arc-'+uid();arc.setAttribute('id',pid);arc.setAttribute('class','track');
-  arc.setAttribute('d','M'+f1(hx+Ra*Math.cos(A1))+' '+f1(hy+Ra*Math.sin(A1))+'A'+f1(Ra)+' '+f1(Ra)+' 0 0 0 '+f1(hx+Ra*Math.cos(A0))+' '+f1(hy+Ra*Math.sin(A0)));
-  nav.appendChild(arc);RK.arc={svg:nav,path:arc,id:pid};
-  var fc=el('div',{cls:'focus',id:'fc'});
-  fc.style.width=fc.style.height=f1(2*F)+'px';fc.style.left=f1(fx-F)+'px';fc.style.top=f1(fy-F)+'px';
-  var fi=el('div',{cls:'fi'});fc.appendChild(fi);sc.appendChild(fc);RK.fc=fc;RK.fi=fi;
-  fillFocus(L,i);fillArc(L,i);
-  var pl=pts[L.length-1],ab=T('button','arc.another',{type:'button',cls:'another',onclick:addRisk});
-  sc.appendChild(ab);var aw=ab.offsetWidth||120,lx=hx+(Ra+6)*Math.cos(pl.a),ly=hy+(Ra+6)*Math.sin(pl.a);ab.style.left=f1(clamp(lx-aw/2,6,W-aw-6))+'px';ab.style.top=f1(ly+8)+'px';
-  sc.appendChild(el('button',{type:'button',cls:'goback',onclick:backToMap},[el('span',{'aria-hidden':'true',html:ARL}),T('span','sc.back')]));
+  var T0=targets(i,RK.reading);RK.items.forEach(function(it,k){setP(it,T0[k]);});
+  markBig(i);if(RK.reading)RK.items[i].el.classList.add('reading');
 }
-function fillFocus(L,i){
-  var sl=L[i],fi=RK.fi,g=G();fi.innerHTML='';RK.fc.classList.toggle('new',sl.k!=='core');
-  if(sl.k==='core'){
-    fi.appendChild(T('span','rk.of',{cls:'eyebrow'},{i:i+1,n:CL[S.c].r.length}));
-    fi.appendChild(T('h3','risk.'+sl.id));
-    fi.appendChild(T('p','riskd.'+sl.id,{cls:'fd'}));
-  }else if(sl.k==='add'){
-    fi.appendChild(T('span','rk.newn',{cls:'eyebrow'},{n:g.added.indexOf(sl.a)+1}));
-    fi.appendChild(el('h3',{id:'fc-t',text:(sl.a.t||'').trim()||plain('rk.untitled')}));
-    fi.appendChild(el('p',{cls:'fd',id:'fc-d',text:(sl.a.d||'').trim()}));
-  }else{
-    fi.appendChild(el('span',{cls:'plusmark','aria-hidden':'true',text:'+'}));
-    fi.appendChild(T('h3','rk.something'));
-    fi.appendChild(T('p','p3.q',{cls:'fd'}));
-  }
+function setP(it,t){var g=RK.g,dx=t.x-g.hx,dy=t.y-g.hy;place(it,Math.atan2(dy,dx),Math.hypot(dx,dy),t.r,t.o);}
+function place(it,a,d,r,o){
+  var g=RK.g,x=g.hx+d*Math.cos(a),y=g.hy+d*Math.sin(a),e=it.el;it.a=a;it.d=d;it.r=r;it.o=o;it.x=x;it.y=y;
+  e.style.width=e.style.height=f1(2*r)+'px';e.style.left=f1(x-r)+'px';e.style.top=f1(y-r)+'px';e.style.opacity=o.toFixed(3);e.style.visibility=o<.02||r<1?'hidden':'';
+  if(it.full){var q=r*1.42;it.full.style.left=f1(x-q/2)+'px';it.full.style.top=f1(y-q/2)+'px';it.full.style.width=it.full.style.height=f1(q)+'px';it.full.style.setProperty('--cap',f1(r-q/2)+'px');}
+  /* its line, from the edge of the cluster to the edge of the risk */
+  var p0=g.Rh+2,p1=d-r-3;
+  if(p1-p0<8||o<.05){it.ln.setAttribute('d','');return;}
+  var ca=Math.cos(a),sa=Math.sin(a),x0=g.hx+p0*ca,y0=g.hy+p0*sa,x1=g.hx+p1*ca,y1=g.hy+p1*sa,bend=(it.k%2?1:-1)*Math.min(16,(p1-p0)*.18);
+  var mx=(x0+x1)/2-sa*bend,my=(y0+y1)/2+ca*bend;
+  it.ln.setAttribute('d','M'+f1(x0)+' '+f1(y0)+'Q'+f1(mx)+' '+f1(my)+' '+f1(x1)+' '+f1(y1));it.ln.style.opacity=o.toFixed(3);
 }
-/* labels along the curve, each one beside its own circle: where you are, the next risk (arrow clockwise), add one by the +, add another past it */
-function fillArc(L,i){
-  var A=RK.arc,svg=A.svg,G0=RK.geo;[].slice.call(svg.querySelectorAll('text')).forEach(function(t){t.remove();});
-  var items=[],sl=L[i];
-  L.forEach(function(s,k){
-    var ang=G0.pts[k].a;
-    if(k===i)items.push({ang:ang,k:s.k==='core'?'arc.risk':s.k==='add'?'arc.newn':'arc.something',v:s.k==='core'?{i:k+1}:s.k==='add'?{n:G().added.indexOf(s.a)+1}:null,cls:'here'});
-    else if(s.k==='new')items.push({ang:ang,k:'arc.add',cls:'mv'+(k===i+1?' go':''),go:function(){setSlide(k);}});
-    else if(k===i+1)items.push({ang:ang,k:'arc.next',cls:'mv go',go:function(){setSlide(k);}});
-  });
-  var fs=G0.narrow?12:13.5;
-  items.forEach(function(it){
-    var t=document.createElementNS(SVGNS,'text'),tp=document.createElementNS(SVGNS,'textPath');
-    tp.setAttribute('href','#'+A.id);tp.setAttribute('startOffset',f1(G0.Ra*(G0.A1-it.ang)));tp.textContent=plain(it.k,it.v);t.appendChild(tp);
-    t.setAttribute('class',it.cls);t.setAttribute('data-copy',it.k);t.setAttribute('text-anchor','middle');t.style.fontSize=fs+'px';
-    if(it.go){t.setAttribute('role','button');t.setAttribute('tabindex','0');t.addEventListener('click',it.go);t.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();it.go();}});}
-    svg.appendChild(t);
-  });
-}
-/* the dotted line from the current small circle to the big one: e = 0 (none) to 1 (all the way) */
-function lineEnds(i){var G0=RK.geo,cp=G0.pts[i],ang=Math.atan2(G0.fy-cp.y,G0.fx-cp.x);
-  return {x0:cp.x+(G0.rs+4)*Math.cos(ang),y0:cp.y+(G0.rs+4)*Math.sin(ang),x1:G0.fx-(G0.F*1.06+6)*Math.cos(ang),y1:G0.fy-(G0.F*1.06+6)*Math.sin(ang)};}
-function setLine(i,e){var p=lineEnds(i);RK.cur.setAttribute('d',e<=0?'':'M'+f1(p.x0)+' '+f1(p.y0)+'L'+f1(p.x0+(p.x1-p.x0)*e)+' '+f1(p.y0+(p.y1-p.y0)*e));}
-function tweenLine(i,from,to,ms,tok,done){
-  var t0=null;function step(ts){if(!RK||RK.tok!==tok)return;if(t0===null)t0=ts;var k=clamp((ts-t0)/ms,0,1),e=k<.5?2*k*k:1-Math.pow(-2*k+2,2)/2;setLine(i,from+(to-from)*e);if(k<1)requestAnimationFrame(step);else if(done)done();}
+function markBig(i){RK.items.forEach(function(it,k){var on=k===i;it.el.classList.toggle('big',on);it.el.setAttribute('aria-current',String(on));
+  it.el.setAttribute('aria-label',slideTitle(it.s)+(on&&it.s.k==='core'?'. '+plain('or.read'):''));if(on)it.el.setAttribute('aria-expanded',String(RK.reading));else it.el.removeAttribute('aria-expanded');});}
+/* every move eases each circle round the cluster: shrinking ones go first, growing ones catch up */
+function animTo(T,ms,stagger,from,done){
+  var tok=++RK.tw,g=RK.g,its=RK.items;
+  var fr=its.map(function(it,k){return from?from[k]:{a:it.a,d:it.d,r:it.r,o:it.o};});
+  var to=T.map(function(t){var dx=t.x-g.hx,dy=t.y-g.hy;return {a:Math.atan2(dy,dx),d:Math.hypot(dx,dy),r:t.r,o:t.o};});
+  if(REDUCE){its.forEach(function(it,k){place(it,to[k].a,to[k].d,to[k].r,to[k].o);});if(done)done();return;}
+  var t0=null,tot=ms+(stagger||0)*its.length;
+  function step(ts){if(!RK||RK.tw!==tok)return;if(t0===null)t0=ts;var el0=ts-t0;
+    its.forEach(function(it,k){var q=clamp((el0-(stagger||0)*k)/ms,0,1),e=EASE(q),f=fr[k],t=to[k],er=t.r<f.r?EASE(Math.min(1,q*1.1)):EASE(Math.max(0,(q-.08)/.92));
+      place(it,f.a+(t.a-f.a)*e,f.d+(t.d-f.d)*er,f.r+(t.r-f.r)*er,f.o+(t.o-f.o)*e);});
+    if(el0<tot)requestAnimationFrame(step);else if(done)done();}
   requestAnimationFrame(step);
 }
-/* moving to another risk: the line pulls back and the words fade, then the new line runs out and the new words fade in */
-function swapTo(i){
-  var old=curI();S.i[S.c]=i;save();
-  if(!RK||!RK.geo||REDUCE){renderRisks();return;}
-  var tok=++RK.tok;
-  RK.fi.classList.add('out');RK.pcol.classList.add('out');
-  tweenLine(old,1,0,200,tok);
-  setTimeout(function(){
-    if(!RK||RK.tok!==tok)return;
-    var L=slides();
-    RK.sms.forEach(function(b,k){b.setAttribute('aria-current',String(k===i));});
-    fillFocus(L,i);fillArc(L,i);
-    RK.pcol.innerHTML='';RK.pcol.appendChild(panel(L,i,L[i]));
-    requestAnimationFrame(function(){if(RK&&RK.tok===tok){RK.fi.classList.remove('out');RK.pcol.classList.remove('out');}});
-    tweenLine(i,0,1,300,tok);
-    renderFrame();
-  },220);
+function orbEnter(){
+  var i=curI(),g=RK.g,T=targets(i,false);RK.st.classList.add('arrive');markBig(-1);
+  var from=RK.items.map(function(it,k){var dx=T[k].x-g.hx,dy=T[k].y-g.hy;return {a:Math.atan2(dy,dx),d:g.Rh*.7,r:0,o:0};});
+  RK.items.forEach(function(it,k){var f=from[k];place(it,f.a,f.d,f.r,f.o);});
+  var order=RK.items.map(function(x,k){return k;});
+  setTimeout(function(){if(!RK)return;animTo(T,1250,170,from,function(){if(RK)RK.st.classList.remove('arrive');});},REDUCE?0:250);
+  setTimeout(function(){if(RK)markBig(i);},REDUCE?0:1050);
 }
-function nextKey(L,i){if(i===L.length-1)return 'nav.record';return L[i+1].k==='new'?'nav.new':'nav.next';}
-function pnav(L,i,posKey,posV){
-  var last=i===L.length-1;
-  return el('div',{cls:'pnav'},[
-    el('button',{type:'button',cls:'navb',disabled:i===0?'true':null,onclick:function(){setSlide(i-1,true);}},['← ',T('span','nav.back')]),
-    T('span',posKey,{cls:'pos'},posV),
-    el('button',{type:'button',cls:'navb',onclick:function(){if(last)go('record');else setSlide(i+1,true);}},[T('span',nextKey(L,i)),' →'])
-  ]);
+function setSlide(i){
+  if(!RK)return;var L=slides();i=clamp(i,0,L.length-1);if(i===curI())return;
+  if(XP.on)xpClose(true);
+  commitDrafts();
+  S.i[cid()]=i;save();RK.reading=false;RK.st.classList.remove('reading');RK.items.forEach(function(it){it.el.classList.remove('reading');});
+  if(RK.rh){RK.rh=0;setOrbH(RK.g.H);}
+  markBig(-1);animTo(targets(i,false),1000,0);
+  setTimeout(function(){if(RK&&curI()===i)markBig(i);},REDUCE?0:560);
+  swapWS();renderFrame();
+  if(NARROW()){var t=RK.st.getBoundingClientRect().top-navH();if(t<0)window.scrollTo({top:scrollY+t,behavior:REDUCE?'auto':'smooth'});}
 }
-function gofoot(L,i){
-  var last=i===L.length-1;
-  return el('div',{cls:'pfoot'},[el('button',{type:'button',cls:'gobtn',onclick:function(){if(last)go('record');else setSlide(i+1,true);}},[T('span',nextKey(L,i)),el('i',{html:ARR})])]);
+function openRead(){
+  if(!RK||RK.reading)return;var i=curI(),it=RK.items[i];if(it.s.k!=='core')return;
+  if(XP.on)xpClose(true);
+  OPENED[readKey(it.s)]=1;beckon(false);
+  RK.reading=true;RK.st.classList.add('reading');it.el.classList.add('reading');markBig(i);wsMode();
+  var t=RK.st.getBoundingClientRect().top;
+  if(NARROW()){t=RK.orb.getBoundingClientRect().top-navH();if(t<-40||t>window.innerHeight*.4)window.scrollTo({top:scrollY+t,behavior:REDUCE?'auto':'smooth'});}
+  else{RK.rh=readH();setOrbH(RK.rh);var nh=navH();if(Math.abs(t-nh)>2)window.scrollTo({top:scrollY+t-nh,behavior:REDUCE?'auto':'smooth'});}
+  animTo(targets(i,true),850,0,null,function(){var f=it.full&&it.full.querySelector('.fs');if(f){f.scrollTop=0;try{f.focus({preventScroll:true});}catch(e){}}});
 }
-function panel(L,i,sl){
-  var p=el('div',{cls:'panel'}),g=G();
-  if(sl.k==='core'){
-    var r=sl.id;
-    p.appendChild(pnav(L,i,'rk.of',{i:i+1,n:CL[S.c].r.length}));
-    var band=el('div',{cls:'band'},[el('span',{cls:'bnum','aria-hidden':'true',text:String(i+1)}),el('div',{cls:'btx'},[T('span','rk.of',{cls:'eyebrow'},{i:i+1,n:CL[S.c].r.length}),T('h2','risk.'+r,{tabindex:'-1'}),T('p','riskd.'+r,{cls:'bdesc'})])]);
-    p.appendChild(band);
-    var hd=el('div',{cls:'phead'});
-    var mb=el('button',{type:'button',cls:'more big','aria-expanded':String(!!OPEN[r])},[T('span',OPEN[r]?'rk.fullhide':'rk.full'),el('span',{cls:'chev',html:CHEV})]);
-    var full=el('div',{cls:'full',html:DATA.core[r].b});full.hidden=!OPEN[r];
-    mb.addEventListener('click',function(){OPEN[r]=!OPEN[r];full.hidden=!OPEN[r];mb.setAttribute('aria-expanded',String(OPEN[r]));var s=mb.firstChild;s.setAttribute('data-copy',OPEN[r]?'rk.fullhide':'rk.full');s.innerHTML=rich(OPEN[r]?'rk.fullhide':'rk.full');});
-    hd.appendChild(mb);hd.appendChild(full);
-    if(i===0)hd.appendChild(T('p','gospel',{cls:'gospel'}));
-    p.appendChild(hd);
-    /* part 1: own words, question with the box beside it */
-    var a1=el('section',{cls:'act','aria-labelledby':'q1-'+r});
-    a1.appendChild(T('span','p1.tag',{cls:'tag'}));
-    var ta=el('textarea',{id:'own-'+r,rows:'4',placeholder:plain('p1.ph'),'aria-labelledby':'q1-'+r});ta.value=g.own[r]||'';
-    var sv=el('span',{cls:'saved','aria-live':'polite'});
-    ta.addEventListener('input',function(){g.own[r]=ta.value;var ok=save();sv.setAttribute('data-copy',ok?'p1.saved':'p1.nosave');sv.innerHTML=rich(ok?'p1.saved':'p1.nosave');renderFrame();});
-    a1.appendChild(el('div',{cls:'agrid'},[T('p','p1.q',{cls:'aq',id:'q1-'+r}),el('div',null,[ta,sv])]));
-    p.appendChild(a1);
-    /* part 2: what's left out */
-    p.appendChild(leftOut(r,g));
-  }else if(sl.k==='add'){
-    p.appendChild(pnav(L,i,'rk.newn',{n:g.added.indexOf(sl.a)+1}));
-    p.appendChild(el('div',{cls:'band new'},[el('span',{cls:'bnum','aria-hidden':'true',text:'+'+(g.added.indexOf(sl.a)+1)}),el('div',{cls:'btx'},[T('span','rk.newn',{cls:'eyebrow'},{n:g.added.indexOf(sl.a)+1}),el('h2',{id:'pb-t',text:(sl.a.t||'').trim()||plain('rk.untitled')})])]));
-    newRisk(p,sl.a,g);
-  }else{
-    p.appendChild(pnav(L,i,'p3.tag'));
-    p.appendChild(el('div',{cls:'band new'},[el('span',{cls:'bnum','aria-hidden':'true',text:'+'}),el('div',{cls:'btx'},[T('span','p3.tag',{cls:'eyebrow'}),T('h2','p3.q',{tabindex:'-1'})])]));
-    var a3=el('section',{cls:'act',style:'border-top:0;padding-top:0'});
-    a3.appendChild(T('p','p3.hint',{cls:'hint'}));
-    a3.appendChild(el('button',{type:'button',cls:'addbig',onclick:addRisk},[el('i',{'aria-hidden':'true',text:'+'}),T('span','p3.add')]));
-    var rl=g.added.filter(real);
-    if(rl.length){
-      a3.appendChild(T('p','p3.list',{cls:'hint',style:'font-weight:700;color:var(--ice)'}));
-      var li=el('div',{cls:'alist'});
-      g.added.forEach(function(a,k){if(!real(a))return;li.appendChild(el('button',{type:'button',cls:'chip',text:'+'+(k+1)+' '+(a.t.trim()||plain('rk.untitled')),onclick:function(){setSlide(CL[S.c].r.length+k,true);}}));});
-      a3.appendChild(li);
-    }
-    p.appendChild(a3);
-    p.appendChild(overlaps(g));
-    p.appendChild(gofoot(L,i));
+function closeRead(first){
+  if(!RK||!RK.reading)return;var i=curI(),it=RK.items[i];
+  RK.reading=false;it.el.classList.remove('reading');RK.st.classList.remove('reading');markBig(i);
+  animTo(targets(i,false),800,0,null,function(){if(RK&&!RK.reading&&RK.rh){RK.rh=0;setOrbH(RK.g.H);}});
+  fillWS(true);
+  if(first===true)toStep2();else try{it.el.focus({preventScroll:true});}catch(e){}
+}
+/* step 1 is done when "I've finished reading" is pressed; then step 2 (the two questions) appears */
+var TICKMARK='<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4.5 12.8l4.8 4.8L19.6 7"/></svg>';
+function finBtn(k){return el('button',{type:'button',cls:'fin',onclick:function(e){e.stopPropagation();finishRead();}},[el('span',{cls:'tk','aria-hidden':'true',html:TICKMARK}),T('span',k||'or.done')]);}
+/* before a risk has been opened, its circle pulses to invite a click (so people read it before pressing Skip) */
+var OPENED={};
+function beckon(on){if(!RK)return;var i=curI();RK.items.forEach(function(it,k){it.el.classList.toggle('beckon',!!on&&k===i);});}
+function isDone(sl){return sl.k!=='core'||!!S.read[readKey(sl)];}
+function wsMode(){if(!RK)return;RK.ws.classList.toggle('hush',!!RK.reading);}
+function finishRead(){
+  if(!RK)return;var sl=slides()[curI()];if(sl.k!=='core')return;
+  var first=!S.read[readKey(sl)];S.read[readKey(sl)]=1;save();
+  if(RK.reading)closeRead(first);else{fillWS(true);if(first)toStep2();}
+}
+function toStep2(){
+  var h=$('step2');if(!h)return;
+  if(NARROW()){var t=h.getBoundingClientRect().top;if(t<navH()+8||t>window.innerHeight*.5)window.scrollTo({top:Math.max(0,scrollY+t-navH()-18),behavior:REDUCE?'auto':'smooth'});}
+  try{h.focus({preventScroll:true});}catch(e){}
+}
+
+/* ---------- the workspace beside the risks: nothing until the risk is read, then both questions at once ---------- */
+/* moving on keeps anything typed but not yet added (with a name) */
+function commitDrafts(){
+  if(!RK||!myName())return false;var r=R(),c=C(),any=false;if(!r||!c)return false;
+  c.r.forEach(function(rid){
+    var a=(DRAFT['own-'+rid]||'').trim();
+    if(a&&!wordsOf(r,rid).some(function(x){return x.pid===ME.pid;})){enter(r);wordsOf(r,rid).push({id:'w'+uid(),pid:ME.pid,t:a,at:Date.now(),st:{}});DRAFT['own-'+rid]='';any=true;}
+    var g=(DRAFT['gap-'+rid]||'').trim();
+    if(g&&nwords(g)<=25){enter(r);gapsOf(r,rid).push({id:'g'+uid(),pid:ME.pid,t:g,k:KIND[rid]||'',at:Date.now(),st:{}});DRAFT['gap-'+rid]='';KIND[rid]='';any=true;}
+  });
+  var nt=(DRAFT.nt||'').trim();if(nt){enter(r);r.news.push({id:'n'+uid(),pid:ME.pid,t:nt,d:(DRAFT.nd||'').trim(),at:Date.now(),st:{}});DRAFT.nt='';DRAFT.nd='';any=true;}
+  if(any){saveRS();renderFrame();}return any;
+}
+function swapWS(){var w=RK.ws;w.classList.add('out');setTimeout(function(){if(!RK)return;fillWS(true);requestAnimationFrame(function(){w.classList.remove('out');});},REDUCE?0:300);}
+function refresh(){if(RK)fillWS(false);else if(S.tab==='room')render();renderFrame();}
+function fillWS(fresh){
+  if(!RK)return;var w=RK.ws,L=slides(),i=curI(),sl=L[i],r=R(),g=RK.g;
+  var a=document.activeElement,fid=a&&a.id&&w.contains(a)?a.id:'',ss=fid&&a.selectionStart!=null?[a.selectionStart,a.selectionEnd]:null;
+  w.innerHTML='';w.classList.toggle('fresh',!!fresh);w.style.paddingTop='';
+  if(g.nar)w.appendChild(el('div',{cls:'wsh'},[sl.k==='core'?T('span','rk.of',{cls:'eyebrow'},{i:i+1,n:C().r.length}):null,el('h2',{text:slideTitle(sl)})]));
+  /* step 1: read it in full. The finished button is always there, beside the risk and inside it while reading */
+  RK.sn.innerHTML='';
+  if(sl.k==='core'&&!S.read[readKey(sl)]){
+    var h1=T('h2','or.step1',{cls:'step',id:'step1',tabindex:'-1'});if(g.nar){RK.sn.appendChild(h1);h1=null;}
+    w.appendChild(el('div',{cls:'s1'},[h1,
+      el('button',{type:'button',cls:'invite',onclick:openRead},[el('span',{cls:'dot','aria-hidden':'true'}),T('span','or.invite')]),
+      finBtn('or.ready')]));
+    beckon(!OPENED[readKey(sl)]);
+    wsMode();
+    if(fid){var f0=$(fid);if(f0)try{f0.focus({preventScroll:true});}catch(e){}}
+    return;
   }
+  beckon(false);
+  /* step 2: the two questions, with room between them */
+  if(sl.k==='core'){
+    w.appendChild(T('h2','or.step2',{cls:'step',id:'step2',tabindex:'-1'}));
+    w.appendChild(ownBox(r,sl.id));w.appendChild(gapBox(r,sl.id));
+    w.appendChild(othersBox(r,sl));
+  }
+  else w.appendChild(newBox(r,sl));
+  var last=i===L.length-1;
+  w.appendChild(el('div',{cls:'pfoot'},[el('button',{type:'button',cls:'gobtn',onclick:function(){if(last){commitDrafts();go('room');}else setSlide(i+1);}},[T('span',last?'nav.room':L[i+1].k==='new'?'nav.new':'nav.next'),el('i',{html:ARR})])]));
+  if(!S.ex)w.appendChild(T('button','or.change',{type:'button',cls:'chg',onclick:function(){commitDrafts();go('setup');}}));
+  wsMode();
+  if(fid){var f=$(fid);if(f){try{f.focus({preventScroll:true});if(ss&&f.setSelectionRange)f.setSelectionRange(ss[0],ss[1]);}catch(e){}}}
+}
+function sec(cls,qk,hk,id,nk){var s=el('section',{cls:'wq '+cls,'aria-labelledby':id});if(nk)s.appendChild(T('span',nk,{cls:'qn'}));s.appendChild(T('h3',qk,{cls:'fq',id:id}));if(hk)s.appendChild(T('p',hk,{cls:'hint'}));return s;}
+/* what others in your room put: hidden until you switch it on, one switch per risk */
+function othOn(sl){return !!(S.oth&&S.oth[readKey(sl)]);}
+function othSwitch(sl){
+  var on=othOn(sl);
+  return el('button',{type:'button',cls:'oth',role:'switch','aria-checked':String(on),id:'oth-'+sl.id,onclick:function(){
+    if(!S.oth||typeof S.oth!=='object')S.oth={};if(on)delete S.oth[readKey(sl)];else S.oth[readKey(sl)]=1;save();fillWS(false);
+    var b=$('oth-'+sl.id);if(b)try{b.focus({preventScroll:true});}catch(e){}}},[el('i',{'aria-hidden':'true'}),T('span','w.others')]);
+}
+function othersBox(r,sl){
+  var rid=sl.id,s=el('section',{cls:'wq others'});s.appendChild(othSwitch(sl));
+  if(!othOn(sl))return s;
+  function notMine(x){return x.pid!==ME.pid;}
+  s.appendChild(el('h4',{cls:'oq'},[T('span','w.q1',{cls:'qn'}),T('span','w.own',{cls:'oqt'})]));
+  s.appendChild(piList(r,wordsOf(r,rid).filter(notMine).sort(byStars),function(x){r.words[rid]=wordsOf(r,rid).filter(function(z){return z!==x;});}));
+  s.appendChild(el('h4',{cls:'oq'},[T('span','w.q2',{cls:'qn'}),T('span','w.gap',{cls:'oqt'})]));
+  s.appendChild(piList(r,gapsOf(r,rid).filter(notMine).sort(function(a,b){return (a.at||0)-(b.at||0);}),function(x){r.gaps[rid]=gapsOf(r,rid).filter(function(z){return z!==x;});}));
+  return s;
+}
+/* question 1: what would you put differently? one wording each */
+function ownBox(r,rid){
+  var s=sec('own','w.own','w.ownhint','q-own','w.q1'),list=wordsOf(r,rid),mine=list.filter(function(x){return x.pid===ME.pid;})[0];
+  if(!mine){
+    var k='own-'+rid,ta=el('textarea',{id:k,rows:'2',placeholder:plain('w.ownph'),'aria-labelledby':'q-own'});ta.value=DRAFT[k]||'';
+    ta.addEventListener('input',function(){DRAFT[k]=ta.value;});
+    function add(){var t=ta.value.trim();if(!t)return;if(!needName(add))return;enter(r);list.push({id:'w'+uid(),pid:ME.pid,t:t,at:Date.now(),st:{}});DRAFT[k]='';saveRS();fillWS(false);renderFrame();}
+    ta.addEventListener('keydown',function(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();add();}});
+    s.appendChild(el('div',{cls:'compose'},[ta,T('button','w.ownadd',{type:'button',cls:'btn',onclick:add})]));
+  }
+  if(mine)s.appendChild(piList(r,[mine],function(x){r.words[rid]=wordsOf(r,rid).filter(function(z){return z!==x;});}));
+  return s;
+}
+/* question 2: what is it leaving out? 25 words, an optional label */
+var LABELS=['who','day','narrow'];
+function gapBox(r,rid){
+  var s=sec('gap','w.gap','w.gaphint','q-gap','w.q2'),list=gapsOf(r,rid),k='gap-'+rid;
+  var chips=el('div',{cls:'chips',role:'group','aria-label':'Label for your note'});
+  LABELS.forEach(function(lb){chips.appendChild(T('button','left.'+lb,{type:'button',cls:'chip','aria-pressed':String(KIND[rid]===lb),onclick:function(){KIND[rid]=KIND[rid]===lb?'':lb;fillWS(false);var t=$(k);if(t)try{t.focus({preventScroll:true});}catch(e){}}}));});
+  s.appendChild(chips);
+  var ta=el('textarea',{id:k,rows:'2',placeholder:plain('w.gapph'),'aria-labelledby':'q-gap','aria-describedby':'cnt-'+rid});ta.value=DRAFT[k]||'';
+  var cnt=el('span',{cls:'cnt',id:'cnt-'+rid,'aria-live':'polite'});
+  function paint(){var n=nwords(ta.value);cnt.textContent=plain(n>25?'w.over':'w.count',{n:n});cnt.classList.toggle('over',n>25);}
+  ta.addEventListener('input',function(){DRAFT[k]=ta.value;paint();});paint();
+  function add(){var t=ta.value.trim();if(!t)return;if(nwords(t)>25){cnt.classList.remove('shake');void cnt.offsetWidth;cnt.classList.add('shake');return;}if(!needName(add))return;
+    enter(r);list.push({id:'g'+uid(),pid:ME.pid,t:t,k:KIND[rid]||'',at:Date.now(),st:{}});KIND[rid]='';DRAFT[k]='';saveRS();fillWS(false);renderFrame();var t2=$(k);if(t2)try{t2.focus({preventScroll:true});}catch(e){}}
+  ta.addEventListener('keydown',function(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();add();}});
+  s.appendChild(el('div',{cls:'compose'},[ta,T('button','w.add',{type:'button',cls:'btn',onclick:add})]));
+  s.appendChild(cnt);
+  var mine=list.filter(function(x){return x.pid===ME.pid;}).sort(function(a,b){return (a.at||0)-(b.at||0);});
+  if(mine.length)s.appendChild(piList(r,mine,function(x){r.gaps[rid]=gapsOf(r,rid).filter(function(z){return z!==x;});}));
+  return s;
+}
+/* something new: a short title and a sentence or two, given hearts to send it on */
+function newBox(r,sl){
+  var s=sec('new','nw.q','nw.hint','q-new');
+  var ti=el('input',{type:'text',id:'nt',maxlength:'90',placeholder:plain('nw.t'),'aria-label':plain('nw.t')});ti.value=DRAFT.nt||'';
+  var de=el('textarea',{id:'nd',rows:'2',placeholder:plain('nw.d'),'aria-label':plain('nw.d')});de.value=DRAFT.nd||'';
+  ti.addEventListener('input',function(){DRAFT.nt=ti.value;});de.addEventListener('input',function(){DRAFT.nd=de.value;});
+  function add(){var t=ti.value.trim();if(!t){ti.focus();return;}if(!needName(add))return;enter(r);r.news.push({id:'n'+uid(),pid:ME.pid,t:t,d:de.value.trim(),at:Date.now(),st:{}});DRAFT.nt='';DRAFT.nd='';saveRS();fillWS(false);renderFrame();}
+  ti.addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();de.focus();}});
+  s.appendChild(el('div',{cls:'nform'},[ti,de,T('button','nw.add',{type:'button',cls:'btn',onclick:add})]));
+  var dropN=function(x){r.news=r.news.filter(function(z){return z!==x;});};
+  var mineN=r.news.filter(function(x){return x.pid===ME.pid;}).sort(function(a,b){return (a.at||0)-(b.at||0);});
+  if(mineN.length)s.appendChild(piList(r,mineN,dropN,true));
+  s.appendChild(othSwitch(sl));
+  if(othOn(sl)){s.appendChild(T('p','nw.list',{cls:'lt'}));s.appendChild(T('p','nw.starhint',{cls:'hint'}));
+    s.appendChild(piList(r,r.news.filter(function(x){return x.pid!==ME.pid;}).sort(byStars),dropN,true));}
+  var ov=el('details',{cls:'ov'},[el('summary',null,[T('span','ov.tag',{cls:'tag'}),T('span','ov.q')])]);
+  ov.appendChild(T('p','ov.hint',{cls:'hint'}));
+  CLUSTERS.forEach(function(c){if(c.id===cid())return;
+    var row=el('div',{cls:'ovrow'});row.style.setProperty('--oc',c.c);row.appendChild(T('span','cl.'+c.id,{cls:'ovc'}));
+    var ch=el('div',{cls:'chips'});
+    c.r.forEach(function(rid){var who=r.creep[rid]||{},n=Object.keys(who).length,on=!!who[ME.pid];
+      ch.appendChild(el('button',{type:'button',cls:'chip','aria-pressed':String(on),'data-r':rid,onclick:function(){if(!needName())return;var w2=r.creep[rid]=r.creep[rid]||{};if(w2[ME.pid])delete w2[ME.pid];else{w2[ME.pid]=1;r.people[ME.pid]={n:myName()};}saveRS();OVOPEN=true;fillWS(false);var b=document.querySelector('.ov [data-r="'+rid+'"]');if(b)b.focus();}},
+        [el('span',{text:plain('risk.'+rid)}),n&&othOn(sl)?el('b',{cls:'cn',text:String(n)}):null]));});
+    row.appendChild(ch);ov.appendChild(row);});
+  if(OVOPEN)ov.open=true;ov.addEventListener('toggle',function(){OVOPEN=ov.open;});
+  s.appendChild(ov);
+  return s;
+}
+var OVOPEN=false;
+/* a person's post-it: their colour and name; yours can be edited or removed; others' can be starred */
+function piList(r,items,drop,isNew){
+  var ul=el('ul',{cls:'pis'});
+  if(!items.length){ul.appendChild(T('li','w.none',{cls:'none'}));return ul;}
+  items.forEach(function(x){ul.appendChild(el('li',null,[postit(r,x,drop,isNew)]));});
+  return ul;
+}
+function postit(r,x,drop,isNew){
+  var mine=x.pid===ME.pid,p=el('div',{cls:'pi'+(mine?' mine':'')+(isNew?' nw':''),'data-id':x.id});p.style.setProperty('--pc',pcol(r,x.pid));
+  function editable(node,key){if(!mine)return node;try{node.contentEditable='plaintext-only';}catch(e){node.contentEditable='true';}node.setAttribute('role','textbox');node.setAttribute('aria-label',plain('pi.edit'));
+    node.addEventListener('keydown',function(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();node.blur();}});
+    node.addEventListener('blur',function(){var t=node.textContent.trim();if(key==='t'&&!t){drop(x);saveRS();refresh();return;}if(key==='t'&&!isNew&&x.k!==undefined&&nwords(t)>25){node.textContent=x[key];return;}if(t!==x[key]){x[key]=t;saveRS();}});return node;}
+  if(isNew){p.appendChild(editable(el('p',{cls:'nt',text:x.t}),'t'));if(x.d||mine)p.appendChild(editable(el('p',{cls:'tx',text:x.d||''}),'d'));}
+  else p.appendChild(editable(el('p',{cls:'tx',text:x.t}),'t'));
+  var meta=el('div',{cls:'meta'},[el('span',{cls:'who',text:pname(r,x.pid)})]);
+  if(x.k)meta.appendChild(el('span',{cls:'kc',text:plain('left.'+x.k)}));
+  var n=stars(x),sp=el('span',{cls:'pst'});
+  if(mine)sp.appendChild(el('span',{cls:'heart own',role:'img','aria-label':plain('pi.likes',{n:n})},[el('span',{'aria-hidden':'true',html:HEART}),el('span',{cls:'sc',text:n?String(n):''})]));
+  else sp.appendChild(el('button',{type:'button',cls:'heart'+(starredByMe(x)?' on':''),'aria-pressed':String(starredByMe(x)),'aria-label':plain(starredByMe(x)?'pi.unstar':'pi.star')+' ('+n+')',onclick:function(){toggleStar(r,x);}},[el('span',{'aria-hidden':'true',html:HEART}),el('span',{cls:'sc',text:n?String(n):''})]));
+  if(mine)sp.appendChild(el('button',{type:'button',cls:'rm','aria-label':plain('pi.remove'),text:'×',onclick:function(){drop(x);saveRS();refresh();}}));
+  meta.appendChild(sp);p.appendChild(meta);
   return p;
 }
-function leftOut(key,g){
-  var f=el('section',{cls:'act'});
-  f.appendChild(T('span','p2.tag',{cls:'tag'}));
-  f.appendChild(el('label',{'for':'gap-'+key},[T('span','p2.q',{cls:'aq'})]));
-  f.appendChild(T('p','p2.hint',{cls:'hint'}));
-  var chips=el('div',{cls:'chips',role:'group','aria-label':'Label the next note'});
-  ['left.1','left.2','left.3'].forEach(function(k){chips.appendChild(T('button',k,{type:'button',cls:'chip','aria-pressed':String(KIND[key]===k),onclick:function(){KIND[key]=KIND[key]===k?'':k;var nf=leftOut(key,g);f.replaceWith(nf);var t=$('gap-'+key);if(t)try{t.focus({preventScroll:true});}catch(e){}}}));});
-  f.appendChild(chips);
-  var ta=el('textarea',{id:'gap-'+key,rows:'2',placeholder:plain('p2.ph')});ta.value=g.draft[key]||'';
-  ta.addEventListener('input',function(){g.draft[key]=ta.value;save();});
-  function add(){var t=ta.value.trim();if(!t)return;(g.gaps[key]=g.gaps[key]||[]).push({id:uid(),t:t,k:KIND[key]?plain(KIND[key]):''});KIND[key]='';g.draft[key]='';save();var nf=leftOut(key,g);f.replaceWith(nf);renderFrame();var t2=$('gap-'+key);if(t2)try{t2.focus({preventScroll:true});}catch(e){}}
-  ta.addEventListener('keydown',function(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();add();}});
-  f.appendChild(el('div',{cls:'compose'},[ta,T('button','p2.add',{type:'button',cls:'btn',onclick:add})]));
-  var list=g.gaps[key]||[];
-  if(!list.length)f.appendChild(T('p','p2.empty',{cls:'empty'}));
-  else{
-    var ul=el('ul',{cls:'notes'});
-    list.forEach(function(n){
-      var tx=el('div',{cls:'tx',text:n.t,'aria-label':'Edit note',spellcheck:'true'});try{tx.contentEditable='plaintext-only';}catch(e){tx.contentEditable='true';}
-      tx.addEventListener('keydown',function(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();tx.blur();}});
-      function drop(){g.gaps[key]=(g.gaps[key]||[]).filter(function(z){return z!==n;});save();var nf=leftOut(key,g);f.replaceWith(nf);renderFrame();}
-      tx.addEventListener('blur',function(){var t=tx.textContent.trim();if(!t){drop();return;}if(t!==n.t){n.t=t;save();}});
-      ul.appendChild(el('li',{cls:'note'},[el('div',{cls:'body'},[n.k?el('span',{cls:'k',text:n.k}):null,tx]),el('button',{type:'button',cls:'x','aria-label':'Remove note',text:'×',onclick:drop})]));
-    });
-    f.appendChild(ul);
+function toggleStar(r,x){
+  if(!needName(function(){toggleStar(r,x);}))return;if(!x.st)x.st={};if(x.st[ME.pid])delete x.st[ME.pid];else{x.st[ME.pid]=1;r.people[ME.pid]={n:myName()};}
+  saveRS();var id=x.id;refresh();var b=document.querySelector('.pi[data-id="'+id+'"] .heart');if(b)try{b.focus({preventScroll:true});}catch(e){}
+}
+var HEART='<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 20.6s-7.9-4.8-9.6-9.8C1.2 7.2 3.4 3.9 6.8 3.9c2.1 0 3.6 1.1 5.2 3 1.6-1.9 3.1-3 5.2-3 3.4 0 5.6 3.3 4.4 6.9-1.7 5-9.6 9.8-9.6 9.8z"/></svg>';
+
+/* ---------- what makes something a risk: the risk is pressed into its core, where it already sits, and its three parts open round it ---------- */
+var XPC={h:'#F0E060',e:'#9670C8',v:'#8FD3F2'},XPA={h:.24,e:.42,v:.26};
+var XPI={
+ h:'<path d="M0 -10 L10.5 8 H-10.5 Z"/><path d="M0 -3.4 V2"/><circle cx="0" cy="5" r="1" fill="currentColor" stroke="none"/>',
+ e:'<circle cx="-6" cy="-4.2" r="3.1"/><path d="M-12 8 C-12 0.6 0 0.6 0 8"/><path d="M2.5 8 V0.2 L8 -5 L13.5 0.2 V8 Z"/><path d="M8 8 V4"/>',
+ v:'<path d="M0 -10.5 L9 -7 V-0.5 C9 5 4.8 8.5 0 10.5 C-4.8 8.5 -9 5 -9 -0.5 V-7 Z"/><path d="M0.8 -10.2 L-2.2 -4.2 L2 -0.2 L-1.6 4.4 L0.4 10"/>'
+};
+function xpIcon(k){return '<svg viewBox="-15 -15 30 30" aria-hidden="true" focusable="false"><g fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">'+XPI[k]+'</g></svg>';}
+var XPMINI='<svg class="mini" viewBox="26 13 268 254" aria-hidden="true" focusable="false"><g fill-opacity=".62" stroke="#56626A" stroke-width="9"><circle cx="160" cy="100" r="82" fill="#8FD3F2"/><circle cx="113" cy="180" r="82" fill="#F0E060"/><circle cx="207" cy="180" r="82" fill="#9670C8"/></g><path d="M160 116 A82 82 0 0 1 125 172 A82 82 0 0 1 195 172 A82 82 0 0 1 160 116Z" fill="#263F60"/></svg>';
+var XP={on:false,tok:0,host:null,ov:false,lay:null};
+var RIPPLE='<svg viewBox="0 0 36 36" aria-hidden="true" focusable="false"><ellipse class="sf" cx="18" cy="25" rx="13" ry="4.2"/><circle class="rip" cx="18" cy="17" r="6"/><circle class="dot" cx="18" cy="17" r="6"/></svg>';
+function xpWait(ms,tok,f){setTimeout(function(){if(XP.tok===tok)f();},REDUCE?0:ms);}
+function xpSay(k){var l=$('xplive');if(l)l.textContent=plain('help.title')+' '+plain(k);}
+function xpBuild(){
+  var h=XP.host,ov=XP.ov,W=h.clientWidth,H=h.clientHeight,nar=W<640,pad=nar?16:30;
+  h.querySelectorAll('.xpl').forEach(function(n){n.remove();});
+  var lay=el('div',{cls:'xpl',role:'region','aria-labelledby':'xph'});h.appendChild(lay);
+  var head=el('div',{cls:'xphead'},[T('h2','help.title',{id:'xph'}),T('p','help.centre')]);lay.appendChild(head);
+  /* where the risk sits now */
+  var big=!ov&&RK?RK.items[curI()]:null,px=big?big.x:W*.42,py=big?big.y:H*.55,r,cx,cy,inside;
+  if(nar){
+    head.style.left=pad+'px';head.style.top=pad+'px';head.style.width=(W-2*pad)+'px';
+    r=Math.min((W-2*pad)/3.05,135);cx=W/2;cy=head.offsetTop+head.offsetHeight+22+1.577*r;inside=false;
+  }else{
+    var ZW=ov?W:W*.53;
+    head.style.left=pad+'px';head.style.top=(pad+4)+'px';head.style.width=Math.min(440,ZW-2*pad)+'px';
+    var hh=head.offsetTop+head.offsetHeight+16;
+    r=Math.min(255,ov?W*.19:(ZW-2*pad)/3.05,(H-hh-20)/2.87);inside=r>=140;var small=r<190;
+    cx=ov?W/2:clamp(px,1.5*r+pad,ZW-1.5*r-pad);cy=clamp(ov?H*.56:py,hh+1.577*r,Math.max(hh+1.577*r,H-1.289*r-16));
   }
-  return f;
-}
-function addRisk(){var g=G(),a={id:'N'+uid(),t:'',d:'',map:'',y:0,n:0,u:0};g.added.push(a);S.i[S.c]=CL[S.c].r.length+g.added.length-1;save();renderRisks(true);var t=$('t-'+a.id);if(t)try{t.focus({preventScroll:true});}catch(e){}}
-function newRisk(p,a,g){
-  var back=!!DATA.supp[a.map],over=!!DATA.core[a.map];
-  p.appendChild(T('span',back?'nw.back':over?'nw.over':'nw.pill',{cls:'pill'+(back?' back':over?' over':'')}));
-  var ti=el('input',{type:'text',id:'t-'+a.id,cls:'ttl',placeholder:plain('nw.t'),'aria-label':plain('nw.t')});ti.value=a.t;
-  ti.addEventListener('input',function(){a.t=ti.value;save();['fc-t','pb-t'].forEach(function(id){var h=$(id);if(h)h.textContent=a.t.trim()||plain('rk.untitled');});});
-  ti.addEventListener('change',function(){renderFrame();});
-  var de=el('textarea',{id:'d-'+a.id,rows:'3',placeholder:plain('nw.d'),'aria-label':plain('nw.d')});de.value=a.d;
-  de.addEventListener('input',function(){a.d=de.value;save();var d=$('fc-d');if(d)d.textContent=a.d.trim();});
-  p.appendChild(el('div',{cls:'phead'},[ti,de]));
-  var m=el('section',{cls:'act'});
-  m.appendChild(el('label',{'for':'m-'+a.id},[T('span','nw.map',{cls:'aq'})]));
-  m.appendChild(T('p','nw.maphint',{cls:'hint'}));
-  var sel=el('select',{cls:'chk',id:'m-'+a.id});
-  sel.appendChild(el('option',{value:'',text:plain('nw.unchecked')}));sel.appendChild(el('option',{value:'none',text:plain('nw.no')}));
-  var og=el('optgroup',{label:plain('nw.ysup')});SUPP.forEach(function(s){og.appendChild(el('option',{value:s,text:plain('sup.'+s)}));});sel.appendChild(og);
-  CLUSTERS.forEach(function(c){if(c.id===S.c)return;var o2=el('optgroup',{label:plain('nw.yin',{c:plain('cl.'+c.id)})});c.r.forEach(function(r){o2.appendChild(el('option',{value:r,text:plain('risk.'+r)}));});sel.appendChild(o2);});
-  sel.value=a.map||'';
-  sel.addEventListener('change',function(){a.map=sel.value;save();renderRisks(false);var s2=$('m-'+a.id);if(s2)try{s2.focus({preventScroll:true});}catch(e){}});
-  m.appendChild(sel);p.appendChild(m);
-  var v=el('section',{cls:'act'});
-  v.appendChild(T('p','nw.vote',{cls:'aq'}));
-  v.appendChild(T('p','nw.votehint',{cls:'hint'}));
-  var vs=el('div',{cls:'votes'});
-  [['y','v.y'],['n','v.n'],['u','v.u']].forEach(function(q){
-    var out=el('output',{text:String(a[q[0]]||0),'aria-live':'polite'});
-    function set(d){a[q[0]]=Math.max(0,(a[q[0]]||0)+d);out.textContent=String(a[q[0]]);save();}
-    vs.appendChild(el('div',{cls:'vote '+q[0],role:'group','aria-label':plain(q[1])},[T('span',q[1]),out,el('button',{type:'button','aria-label':'One fewer','text':'−',onclick:function(){set(-1);}}),el('button',{type:'button','aria-label':'One more',text:'+',onclick:function(){set(1);}})]));
+  var d=r,C3={v:[cx,cy-d/Math.sqrt(3)],h:[cx-d/2,cy+d/(2*Math.sqrt(3))],e:[cx+d/2,cy+d/(2*Math.sqrt(3))]};
+  /* the three parts, each a soft light over the dark */
+  [['v','help.vul','help.vuld'],['h','help.haz','help.hazd'],['e','help.exp','help.expd']].forEach(function(a,n){
+    var k=a[0],c=el('div',{cls:'xc','data-k':k});c.style.setProperty('--k',XPC[k]);c.style.setProperty('--ka',XPA[k]);c.style.setProperty('--n',n);
+    c.style.left=f1(C3[k][0]-r)+'px';c.style.top=f1(C3[k][1]-r)+'px';c.style.width=c.style.height=f1(2*r)+'px';
+    c.style.transformOrigin=f1(cx-C3[k][0]+r)+'px '+f1(cy-C3[k][1]+r)+'px';
+    var dx=C3[k][0]-cx,dy=C3[k][1]-cy,dl=Math.hypot(dx,dy)||1,lx=r+dx/dl*r*(inside?(small?.5:.42):.46),ly=r+dy/dl*r*(inside?(small?.5:.42):.46);
+    var lb=el('div',{cls:'xlab'+(inside?' in':'')+(inside&&small?' tiny':'')},[el('span',{html:xpIcon(k)}),T('b',a[1])]);
+    if(inside){lb.appendChild(T('span',a[2],{cls:'xd'}));if(k==='e')lb.appendChild(T('span','help.expx',{cls:'x'}));lb.style.width=f1(r*(small?.8:.86))+'px';}
+    lb.style.left=f1(lx)+'px';lb.style.top=f1(ly)+'px';c.appendChild(lb);
+    c.addEventListener('click',function(){c.classList.toggle('hov');});
+    lay.appendChild(c);
   });
-  v.appendChild(vs);
-  if(CONF[a.id])v.appendChild(el('div',{cls:'confirm'},[T('span','nw.rmq'),
-      T('button','nw.rmyes',{type:'button',cls:'btn w',onclick:function(){delete CONF[a.id];g.added=g.added.filter(function(z){return z!==a;});save();S.i[S.c]=CL[S.c].r.length+g.added.length;save();renderRisks(false);}}),
-      T('button','nw.rmno',{type:'button',cls:'btn l',onclick:function(){delete CONF[a.id];renderRisks(false);}})]));
-  else v.appendChild(T('button','nw.rm',{type:'button',cls:'rm',onclick:function(){CONF[a.id]=1;renderRisks(false);}}));
-  p.appendChild(v);
+  var id='xp'+uid(),s='<defs>';
+  ['v','h'].forEach(function(k){s+='<clipPath id="'+id+k+'"><circle cx="'+f1(C3[k][0])+'" cy="'+f1(C3[k][1])+'" r="'+f1(r)+'"/></clipPath>';});
+  s+='</defs><g class="core" clip-path="url(#'+id+'v)"><g clip-path="url(#'+id+'h)"><circle cx="'+f1(C3.e[0])+'" cy="'+f1(C3.e[1])+'" r="'+f1(r)+'" style="fill:var(--c)"/></g></g>';
+  var svg=document.createElementNS(SVGNS,'svg');svg.setAttribute('class','xpv');svg.setAttribute('role','img');svg.setAttribute('aria-label',plain('help.alt'));svg.innerHTML=s;lay.appendChild(svg);
+  var t=el('div',{cls:'xpt'},[el('span',{cls:'tt','aria-hidden':'true'})]);
+  if(!ov&&RK&&slides()[curI()].k==='core')t.appendChild(el('button',{type:'button',cls:'xpread','aria-label':plain('or.read'),title:plain('or.read'),html:RIPPLE,onclick:xpToRead}));
+  lay.appendChild(t);
+  var need=0;
+  if(!inside){
+    var defs=el('ul',{cls:'xpdefs'},[['h','help.haz','help.hazd'],['e','help.exp','help.expd'],['v','help.vul','help.vuld']].map(function(a){
+      var li=el('li',{'data-k':a[0]},[T('b',a[1]),T('p',a[2])]);li.style.setProperty('--k',XPC[a[0]]);
+      if(a[0]==='e'){li.appendChild(T('p','help.expx',{cls:'x'}));li.addEventListener('click',function(){li.classList.toggle('hov');});}return li;}));
+    defs.style.left=pad+'px';defs.style.width=(W-2*pad)+'px';defs.style.top=f1(cy+1.289*r+26)+'px';lay.appendChild(defs);
+    need=cy+1.289*r+26+defs.offsetHeight+90;
+  }
+  XP.lay={r:r,cx:cx,cy:cy,t:t,lay:lay};xpTitle();
+  if(need>H){h.style.height=Math.ceil(need)+'px';lay.style.height=Math.ceil(need)+'px';}
+  if(big){var sc=(r*.42)/Math.max(1,big.r);big.el.style.setProperty('--xpT','translate('+f1(cx-big.x)+'px,'+f1(cy-big.y)+'px) scale('+sc.toFixed(3)+')');}
 }
-function overlaps(g){
-  var box=el('section',{cls:'act'});
-  box.appendChild(T('span','ov.tag',{cls:'tag',style:'background:rgba(255,255,255,.18);color:var(--ice)'}));
-  box.appendChild(T('p','ov.q',{cls:'aq'}));
-  box.appendChild(T('p','ov.hint',{cls:'hint'}));
-  CLUSTERS.forEach(function(c){
-    if(c.id===S.c)return;
-    var row=el('div',{cls:'ovrow'});row.style.setProperty('--oc',c.c);
-    row.appendChild(T('span','cl.'+c.id,{cls:'ovc'}));
-    var chips=el('div',{cls:'chips'});
-    c.r.forEach(function(r){var on=g.over.indexOf(r)>=0;chips.appendChild(el('button',{type:'button',cls:'chip','aria-pressed':String(on),'data-r':r,text:plain('risk.'+r),onclick:function(){var k=g.over.indexOf(r);if(k>=0)g.over.splice(k,1);else g.over.push(r);save();var nb=overlaps(g);box.replaceWith(nb);renderFrame();var b=nb.querySelector('[data-r="'+r+'"]');if(b)b.focus();}}));});
-    row.appendChild(chips);box.appendChild(row);
+function xpTitle(){
+  if(!XP.lay)return;var t=XP.lay.t,r=XP.lay.r;
+  t.firstChild.textContent=!XP.ov&&RK?slideTitle(slides()[curI()]):plain('help.risk');
+  t.style.left=f1(XP.lay.cx)+'px';t.style.top=f1(XP.lay.cy+r*.04)+'px';t.style.width=f1(r*.84)+'px';
+  for(var fs=19;fs>=11;fs--){t.style.fontSize=fs+'px';if(t.offsetHeight<=r*.66&&t.scrollWidth<=r*.84+1)break;}
+}
+function xpBtn(){var b=$('xpbtn');if(!b)return;b.setAttribute('aria-expanded',String(XP.on));var bk=b.querySelector('.bk span:last-child');if(bk){var k=XP.ov||!RK?'help.backx':'help.back';bk.setAttribute('data-copy',k);bk.innerHTML=rich(k);}}
+function xpOpen(){
+  if(XP.on)return;
+  if(RK&&RK.reading){RK.reading=false;RK.st.classList.remove('reading');RK.items.forEach(function(it){it.el.classList.remove('reading');});if(RK.rh){RK.rh=0;setOrbH(RK.g.H);}var T0=targets(curI(),false);RK.items.forEach(function(it,k){setP(it,T0[k]);});markBig(curI());wsMode();}
+  XP.on=true;XP.ov=!RK;var tok=++XP.tok;
+  if(XP.ov){var o=el('div',{id:'xpov',cls:'xpov'});document.body.appendChild(o);XP.host=o;document.documentElement.classList.add('xpfix');}
+  else XP.host=RK.orb;
+  xpBtn();xpSay('help.opened');
+  var host=XP.host,wait=0;
+  if(!XP.ov&&NARROW()){var tb=document.querySelector('.tabs'),target=Math.max(0,RK.st.getBoundingClientRect().top+scrollY-(tb?tb.offsetHeight:46));if(Math.abs(scrollY-target)>4){wait=380;window.scrollTo({top:target,behavior:REDUCE?'auto':'smooth'});}}
+  xpWait(wait,tok,function(){
+    host.classList.add('xpa');xpBuild();
+    requestAnimationFrame(function(){
+      host.classList.add('xp1');if(RK&&!XP.ov)RK.st.classList.add('xpon');
+      xpWait(XP.ov?0:90,tok,function(){host.classList.add('xp2');});
+      xpWait(XP.ov?60:320,tok,function(){host.classList.add('xp3');});
+      xpWait(XP.ov?280:600,tok,function(){host.classList.add('xp4');});
+    });
   });
-  return box;
 }
-function needCluster(v){
-  var st=el('section',{cls:'stage need'},[T('h2','need.q',{cls:'q'}),T('button','need.btn',{type:'button',cls:'gobtn',onclick:function(){go('choose');}})]);
+function xpClose(quiet){
+  if(!XP.on)return;XP.on=false;var tok=++XP.tok,host=XP.host,ov=XP.ov;xpBtn();
+  if(!quiet)xpSay('help.closed');
+  function end(){if(host){host.classList.remove('xpa','xp1','xp2','xp3','xp4');host.style.height='';host.querySelectorAll('.xpl').forEach(function(n){n.remove();});}if(ov&&host)host.remove();document.documentElement.classList.remove('xpfix');if(RK)RK.st.classList.remove('xpon');XP.lay=null;if(RK&&!ov){var H=stageH(RK.st.clientWidth);RK.orb.style.height=H+'px';}}
+  if(quiet||!host||!host.isConnected){end();return;}
+  host.classList.remove('xp4');
+  if(ov){host.classList.add('xpout');setTimeout(function(){if(XP.tok===tok||!XP.on)end();},REDUCE?0:420);return;}
+  host.classList.remove('xp3');
+  xpWait(160,tok,function(){host.classList.remove('xp2');RK&&RK.st.classList.remove('xpon');});
+  xpWait(420,tok,function(){host.classList.remove('xp1');});
+  xpWait(980,tok,end);
+  if(!quiet){var b=$('xpbtn');if(b)try{b.focus({preventScroll:true});}catch(e){}}
+}
+/* from the core straight back into reading the risk: the risk grows out of the centre */
+function xpToRead(){
+  if(!XP.on||!RK)return;XP.on=false;var tok=++XP.tok,host=XP.host;xpBtn();xpSay('help.closed');
+  host.classList.remove('xp4','xp3','xp2','xp1');RK.st.classList.remove('xpon');
+  openRead();
+  setTimeout(function(){if(XP.tok!==tok)return;host.classList.remove('xpa');if(RK)RK.orb.style.height=stageH(RK.st.clientWidth)+'px';host.querySelectorAll('.xpl').forEach(function(n){n.remove();});XP.lay=null;},REDUCE?0:950);
+}
+function xpRestore(){var h=XP.host;if(!h)return;h.classList.add('xpnow','xpa','xp1','xp2','xp3','xp4');if(RK&&!XP.ov)RK.st.classList.add('xpon');xpBuild();requestAnimationFrame(function(){requestAnimationFrame(function(){h.classList.remove('xpnow');});});}
+/* the button: bottom left, on every tab */
+(function(){
+  var b=el('button',{type:'button',id:'xpbtn','aria-expanded':'false',onclick:function(){if(XP.on)xpClose();else xpOpen();}});
+  b.innerHTML=XPMINI;b.appendChild(T('span','help.title',{cls:'lg'}));b.appendChild(T('span','help.btn',{cls:'sh'}));
+  b.appendChild(el('span',{cls:'bk'},[el('span',{'aria-hidden':'true',html:ARL}),T('span','help.back')]));
+  document.body.appendChild(b);
+  document.body.appendChild(el('p',{id:'xplive','aria-live':'polite',style:'position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap'}));
+  var eb=$('edbar');function edh(){document.documentElement.style.setProperty('--edh',(eb&&!eb.hidden&&eb.offsetHeight?eb.offsetHeight+10:0)+'px');}
+  if(window.ResizeObserver&&eb)new ResizeObserver(edh).observe(eb);edh();
+  document.addEventListener('focusin',function(e){var t=e.target;document.documentElement.classList.toggle('typing',!!(t&&t.matches&&t.matches('textarea,input[type=text],#joinname,[contenteditable="true"],[contenteditable="plaintext-only"]')));});
+  document.addEventListener('focusout',function(){setTimeout(function(){var a=document.activeElement;if(!a||!a.matches||!a.matches('textarea,input[type=text],#joinname,[contenteditable="true"],[contenteditable="plaintext-only"]'))document.documentElement.classList.remove('typing');},0);});
+})();
+
+/* ---------- our room: everything the room added, together; a name filters to one person ---------- */
+function people(r){var seen={},out=[];
+  function add(p){if(p&&!seen[p]){seen[p]=1;out.push(p);}}
+  add(ME.pid);r.order.forEach(add);Object.keys(r.people).forEach(add);return out;}
+function vRoom(v){
+  if(!cid()){needRoom(v);return;}
+  var r=R(),c=C(),f=S.filt&&(S.filt===ME.pid||r.people[S.filt])?S.filt:'';
+  var st=el('section',{cls:'stage rmv','aria-labelledby':'rmq'});st.style.setProperty('--c',c.c);
+  var head=el('div',{cls:'rmhead'},[el('span',{cls:'eyebrow',text:roomLabel()+' · '+plain('cl.'+c.id)}),T('h2','room.q',{cls:'q',id:'rmq'}),T('p','room.lead',{cls:'lead'})]);
+  var chips=el('div',{cls:'names',role:'group','aria-label':'Show one person'});
+  function chip(pid,label){var on=f===pid;var b=el('button',{type:'button',cls:'nm','aria-pressed':String(on),onclick:function(){S.filt=on?'':pid;save();render();}},[pid?el('i',{'aria-hidden':'true'}):null,el('span',{text:label})]);if(pid)b.style.setProperty('--pc',pcol(r,pid));return b;}
+  chips.appendChild(chip('',plain('room.all')));
+  people(r).forEach(function(p){chips.appendChild(chip(p,p===ME.pid?plain('room.me'):pname(r,p)));});
+  head.appendChild(chips);st.appendChild(head);
+  function keep(x){return !f||x.pid===f;}
+  var cols=el('div',{cls:'rcols'});cols.style.setProperty('--n',c.r.length);
+  c.r.forEach(function(rid,i){
+    var col=el('article',{cls:'rcol'},[T('span','rk.of',{cls:'eyebrow'},{i:i+1,n:c.r.length}),T('h3','risk.'+rid)]);
+    col.appendChild(T('h4','room.words'));
+    col.appendChild(piList(r,wordsOf(r,rid).filter(keep).sort(byStars),function(x){r.words[rid]=wordsOf(r,rid).filter(function(z){return z!==x;});}));
+    col.appendChild(T('h4','room.gaps'));
+    var gs=gapsOf(r,rid).filter(keep),any=false;
+    LABELS.concat(['']).forEach(function(lb){var g=gs.filter(function(x){return (x.k||'')===lb;}).sort(byStars);if(!g.length)return;any=true;
+      col.appendChild(T('h5',lb?'left.'+lb:'left.other'));col.appendChild(piList(r,g,function(x){r.gaps[rid]=gapsOf(r,rid).filter(function(z){return z!==x;});}));});
+    if(!any)col.appendChild(T('p','room.none',{cls:'none'}));
+    cols.appendChild(col);
+  });
+  st.appendChild(cols);
+  var nw=el('section',{cls:'rnew'},[T('h3','room.new'),T('p','room.newhint',{cls:'hint'})]);
+  nw.appendChild(piList(r,r.news.filter(keep).sort(byStars),function(x){r.news=r.news.filter(function(z){return z!==x;});},true));
+  st.appendChild(nw);
+  var cr=el('section',{cls:'rcreep'},[T('h3','room.creep')]),rows=[];
+  Object.keys(r.creep).forEach(function(rid){var who=Object.keys(r.creep[rid]||{}).filter(function(p){return !f||p===f;});if(who.length&&DATA.core[rid])rows.push({rid:rid,who:who});});
+  rows.sort(function(a,b){return b.who.length-a.who.length;});
+  if(!rows.length)cr.appendChild(T('p','room.none',{cls:'none'}));
+  else{var ul=el('ul');rows.forEach(function(x){var oc=CL[clusterOfRisk(x.rid)];var li=el('li',null,[el('b',{cls:'cn',text:String(x.who.length)}),el('span',{text:plain('risk.'+x.rid)}),el('span',{cls:'from',text:plain('cl.'+oc.id)})]);li.style.setProperty('--oc',oc.c);ul.appendChild(li);});cr.appendChild(ul);}
+  st.appendChild(cr);
   v.appendChild(st);
 }
 
-/* ---------- supplementary: plain circles on a grey field ---------- */
+/* ---------- the record: built from Our room, with names and stars ---------- */
+function record(){
+  var r=R(),c=C();if(!r||!c)return '';var L=[],sn=function(x){var n=stars(x);return n?'  ♥'+n:'';};
+  L.push('WHAT’S MISSING · '+roomLabel().toUpperCase()+' · '+plain('cl.'+c.id).toUpperCase());L.push('');
+  c.r.forEach(function(rid,i){
+    L.push((i+1)+'. '+plain('risk.'+rid));
+    var ws=wordsOf(r,rid).slice().sort(byStars);L.push('   In our words:'+(ws.length?'':' –'));
+    ws.forEach(function(x){L.push('   - '+x.t+' ('+pname(r,x.pid)+')'+sn(x));});
+    var gs=gapsOf(r,rid);L.push('   Left out:'+(gs.length?'':' –'));
+    LABELS.concat(['']).forEach(function(lb){gs.filter(function(x){return (x.k||'')===lb;}).sort(byStars).forEach(function(x){L.push('   - '+(lb?'['+plain('left.'+lb)+'] ':'')+x.t+' ('+pname(r,x.pid)+')'+sn(x));});});
+    L.push('');
+  });
+  var nw=r.news.slice().sort(byStars);
+  L.push('NEW RISKS FOR THE WHOLE HOUSE'+(nw.length?' (by hearts)':': none'));
+  nw.forEach(function(x,i){L.push((i+1)+'. '+x.t+' ('+pname(r,x.pid)+')  ♥'+stars(x));if(x.d)L.push('   '+x.d);});
+  var cr=Object.keys(r.creep).map(function(rid){return {rid:rid,n:Object.keys(r.creep[rid]||{}).length};}).filter(function(x){return x.n&&DATA.core[x.rid];}).sort(function(a,b){return b.n-a.n;});
+  if(cr.length){L.push('');L.push('KEPT CREEPING IN FROM OTHER CLUSTERS');cr.forEach(function(x){L.push('- '+plain('risk.'+x.rid)+' ('+plain('cl.'+clusterOfRisk(x.rid))+'): '+x.n);});}
+  return L.join('\n').trim();
+}
+function vRecord(v){
+  if(!cid()){needRoom(v);return;}
+  var st=el('section',{cls:'stage rc'}),p=el('div',{cls:'rcw'});
+  p.appendChild(T('h2','rc.q'));p.appendChild(T('p','rc.lead',{cls:'lead'}));
+  var out=el('textarea',{cls:'out',id:'rec',readonly:'true','aria-label':plain('rc.q')});out.value=record();
+  var toast=el('span',{cls:'toast','aria-live':'polite'});
+  p.appendChild(el('div',{cls:'acts'},[el('button',{type:'button',cls:'gobtn',onclick:function(){
+    var t=out.value,fall=function(){out.focus();out.select();var ok=false;try{ok=document.execCommand('copy');}catch(e){}toast.textContent=plain(ok?'rc.copied':'rc.select');};
+    try{navigator.clipboard.writeText(t).then(function(){toast.textContent=plain('rc.copied');},fall);}catch(e){fall();}
+  }},[T('span','rc.copy'),el('i',{html:ARR})]),toast]));
+  p.appendChild(out);st.appendChild(p);v.appendChild(st);
+}
+
+/* ---------- supplementary: plain circles ---------- */
 var SPOS={W:[[.24,.20,.17],[.66,.15,.15],[.45,.47,.19],[.83,.47,.14],[.20,.77,.16],[.64,.80,.17]],
           P:[[.30,.10,.25],[.72,.25,.22],[.30,.42,.24],[.72,.57,.22],[.30,.74,.23],[.69,.89,.25]]};
 function vSupp(v){
@@ -830,9 +1828,9 @@ function vSupp(v){
   st.appendChild(el('div',{cls:'head'},[T('span','sp.eyebrow',{cls:'eyebrow'}),T('h2','sp.q',{cls:'q',id:'spq'}),T('p','sp.lead',{cls:'lead'})]));
   var fld=el('div',{cls:'pfield',role:'group','aria-label':plain('sp.q')});st.appendChild(fld);
   SUPP.forEach(function(s){fld.appendChild(el('button',{type:'button',cls:'pc','data-s':s,'aria-pressed':String(S.supp===s),'aria-controls':'reader',onclick:function(){S.supp=s;save();render();if(window.innerWidth<900){var r=$('reader');if(r)r.scrollIntoView({block:'start'});}}},[T('span','sup.'+s)]));});
-  var R=DATA.supp[S.supp]||DATA.supp[SUPP[0]];
-  var rd=el('article',{cls:'reader',id:'reader','aria-live':'polite'},[T('span','sp.eyebrow',{cls:'eyebrow'}),T('h3','sup.'+S.supp),el('div',{cls:'body',html:R.b})]);
-  if(R.o)rd.appendChild(el('aside',null,[T('span','sp.rules',{cls:'eyebrow'}),el('div',{cls:'body',html:R.o})]));
+  var R0=DATA.supp[S.supp]||DATA.supp[SUPP[0]];
+  var rd=el('article',{cls:'reader',id:'reader','aria-live':'polite'},[T('span','sp.eyebrow',{cls:'eyebrow'}),T('h3','sup.'+S.supp),el('div',{cls:'body',html:R0.b})]);
+  if(R0.o)rd.appendChild(el('aside',null,[T('span','sp.rules',{cls:'eyebrow'}),el('div',{cls:'body',html:R0.o})]));
   st.appendChild(rd);v.appendChild(st);
   layoutSupp();
 }
@@ -841,70 +1839,39 @@ function layoutSupp(){
   fld.querySelectorAll('.pc').forEach(function(b,k){var q=P[k]||P[0],r=q[2]*Math.min(W*.74,H*.9);b.style.width=b.style.height=f1(2*r)+'px';b.style.left=f1(q[0]*W-r)+'px';b.style.top=f1(q[1]*H-r)+'px';var len=(b.textContent||'').length;b.style.fontSize=f1(clamp(r*.19*(len>55?.8:1),12,20))+'px';b.style.padding='0 '+f1(r*.2)+'px';});
 }
 
-/* ---------- the record ---------- */
-function record(){
-  var c=CL[S.c];if(!c)return '';var g=G(),L=[];
-  L.push('WHAT’S MISSING · '+plain('cl.'+c.id).toUpperCase());L.push('');
-  c.r.forEach(function(r,i){
-    L.push((i+1)+'. '+plain('risk.'+r));
-    L.push('   In our words: '+((g.own[r]||'').trim()||'–'));
-    var gs=g.gaps[r]||[];L.push('   Left out:'+(gs.length?'':' –'));
-    gs.forEach(function(n){L.push('   - '+(n.k?'['+n.k+'] ':'')+n.t);});
-    L.push('');
-  });
-  var rl=g.added.filter(real);
-  L.push('NEW RISKS'+(rl.length?'':': none'));
-  rl.forEach(function(a,i){
-    L.push('+'+(i+1)+'. '+(a.t.trim()||'(no title yet)'));
-    if(a.d.trim())L.push('   '+a.d.trim());
-    L.push('   On the map already: '+(a.map==='none'?'No, new':DATA.supp[a.map]?'Yes, bring back “'+plain('sup.'+a.map)+'”':DATA.core[a.map]?'Overlaps “'+plain('risk.'+a.map)+'”':'not checked'));
-    L.push('   Put it forward: yes '+(a.y||0)+' · no '+(a.n||0)+' · unsure '+(a.u||0));
-    L.push('');
-  });
-  if(g.over.length){L.push('KEPT CREEPING IN FROM OTHER CLUSTERS');g.over.forEach(function(r){var x=CLUSTERS.filter(function(z){return z.r.indexOf(r)>=0;})[0];L.push('- '+plain('risk.'+r)+' ('+plain('cl.'+x.id)+')');});}
-  return L.join('\n').trim();
-}
-var ASK=false;
-function vRecord(v){
-  if(!S.c){needCluster(v);return;}
-  var st=el('section',{cls:'stage rc'}),p=el('div',{cls:'panel'});
-  p.appendChild(T('h2','rc.q'));p.appendChild(T('p','rc.lead',{cls:'hint',style:'font-size:17px'}));
-  var out=el('textarea',{cls:'out',id:'rec',readonly:'true','aria-label':plain('rc.q')});out.value=record();
-  var toast=el('span',{cls:'toast','aria-live':'polite'});
-  var acts=el('div',{cls:'acts'});
-  acts.appendChild(T('button','rc.copy',{type:'button',cls:'btn',onclick:function(){
-    var t=out.value,fall=function(){out.focus();out.select();var ok=false;try{ok=document.execCommand('copy');}catch(e){}toast.textContent=plain(ok?'rc.copied':'rc.select');};
-    try{navigator.clipboard.writeText(t).then(function(){toast.textContent=plain('rc.copied');},fall);}catch(e){fall();}
-  }}));
-  acts.appendChild(T('button','rc.clear',{type:'button',cls:'btn l',onclick:function(){ASK=true;render();}}));
-  acts.appendChild(toast);p.appendChild(acts);
-  if(ASK)p.appendChild(el('div',{cls:'confirm'},[T('span','rc.warn',null,{c:plain('cl.'+S.c)}),
-    T('button','rc.yes',{type:'button',cls:'btn w',onclick:function(){ASK=false;delete S.by[S.c];S.i[S.c]=0;save();render();}}),
-    T('button','rc.keep',{type:'button',cls:'btn l',onclick:function(){ASK=false;render();}})]));
-  p.appendChild(out);st.appendChild(p);v.appendChild(st);
-}
-
 /* ---------- render ---------- */
 function render(){
-  if(S.tab!=='record')ASK=false;
-  if(TABS.indexOf(S.tab)<0)S.tab='choose';
+  if(S.tab==='record')S.tab='room';
+  if(TABS.indexOf(S.tab)<0)S.tab='setup';
+  if(XP.on)xpClose(true);
   var v=$('view');v.innerHTML='';v.setAttribute('role','tabpanel');v.setAttribute('aria-labelledby','tab-'+S.tab);
   CH=null;RK=null;
   renderFrame();
-  if(S.tab==='choose')vChoose(v);else if(S.tab==='risks')vRisks(v);else if(S.tab==='supp')vSupp(v);else vRecord(v);
+  if(S.tab==='setup')vSetup(v);else if(S.tab==='risks')vRisks(v);else if(S.tab==='supp')vSupp(v);else if(S.tab==='room')vRoom(v);else vRecord(v);
+  xpBtn();
 }
-var rzT=null;window.addEventListener('resize',function(){clearTimeout(rzT);rzT=setTimeout(function(){if(CH)layoutChoose();if(RK){var L=slides(),i=curI();drawScene(L,i,L[i]);}layoutSupp();},140);});
+var rzT=null,lastW=window.innerWidth;
+window.addEventListener('resize',function(){clearTimeout(rzT);rzT=setTimeout(function(){
+  var wch=Math.abs(window.innerWidth-lastW)>2;lastW=window.innerWidth;
+  renderTabs();if(CH)layoutChoose();
+  if(RK&&(wch||!NARROW())){RK.tw++;drawOrbit();fillWS(false);}
+  if(XP.on){if(XP.ov||RK)xpRestore();}
+  layoutSupp();},140);});
 try{document.fonts.ready.then(function(){if(CH)layoutChoose();});}catch(e){}
 document.addEventListener('keydown',function(e){
-  if(S.tab!=='risks'||!RK||!$('ed').hidden)return;
-  var t=e.target;if(t&&t.closest&&t.closest('input,textarea,select,[contenteditable="true"],[contenteditable="plaintext-only"]'))return;
+  if(!$('ed').hidden)return;
+  if(e.key==='Escape'){if(XP.on){e.preventDefault();xpClose();return;}if(RK&&RK.reading){e.preventDefault();closeRead();return;}}
+  if(S.tab!=='risks'||!RK||XP.on)return;
+  var t=e.target;if(t&&t.closest&&t.closest('input,textarea,select,[contenteditable="true"],[contenteditable="plaintext-only"],.fs'))return;
   if(e.altKey||e.ctrlKey||e.metaKey)return;
   if(e.key==='ArrowRight'){var L=slides(),i=curI();if(i<L.length-1)setSlide(i+1);}else if(e.key==='ArrowLeft')setSlide(curI()-1);
 });
-/* links: #data #voters #kids #work #war #check open a cluster; #supp the supplementary risks */
-function fromHash(){var h=(location.hash||'').slice(1);if(CL[h]){S.c=h;S.tab='risks';save();}else if(h==='supp'){S.tab='supp';save();}}
+/* links: #g5 opens room 5 (asks for a name first if there isn't one); #supp the supplementary risks; #example the example room */
+function fromHash(){var h=(location.hash||'').slice(1),m=/^g(\d{1,2})$/.exec(h);
+  if(m&&ROOMC[+m[1]]){S.room=m[1];S.ex=false;S.tab=myName()?(S.tab==='setup'?'risks':S.tab):'setup';if(!myName())PICK=m[1];save();}
+  else if(h==='supp'){S.tab='supp';save();}
+  else if(h==='example'){RS.ex=RS.ex||exampleRoom();saveRS();S.ex=true;S.tab='risks';save();}}
 fromHash();window.addEventListener('hashchange',function(){fromHash();render();});
-
 /* ---------- editing the page's own text (people who can edit this page) ---------- */
 var ART=null,CAN=false,EDITMODE=false,EDKEY=null,EDANCHOR=null,saveTimer=null,retried=false;
 try{EDITMODE=sessionStorage.getItem('hotp-missing-edit')==='1';}catch(e){}
@@ -980,6 +1947,7 @@ $('edreset').addEventListener('click',function(){commitEditor(true);});
 $('edtoggle').addEventListener('click',function(){EDITMODE=!EDITMODE;try{sessionStorage.setItem('hotp-missing-edit',EDITMODE?'1':'');}catch(e){}applyCan();});
 window.addEventListener('beforeunload',function(e){if(saveTimer&&$('edstatus').textContent.indexOf('moment')>=0){e.preventDefault();e.returnValue='';}});
 
+
 render();
 (function(){
   if(!window.claude||!window.claude.use)return;
@@ -989,5 +1957,4 @@ render();
   }).catch(function(){});
 })();
 </script>
-
 </body></html>
