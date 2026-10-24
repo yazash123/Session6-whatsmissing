@@ -2001,7 +2001,7 @@ function gapBox(r,rid){
 }
 /* something new: a short title and a sentence or two, given hearts to send it on */
 function newBox(r,sl){
-  var s=sec('new','nw.q','nw.hint','q-new');
+  var s=sec('new','nw.q','','q-new');
   var ti=el('input',{type:'text',id:'nt',maxlength:'90',placeholder:plain('nw.t'),'aria-label':plain('nw.t')});ti.value=DRAFT.nt||'';
   var de=el('textarea',{id:'nd',rows:'2',maxlength:'600',placeholder:plain('nw.d'),'aria-label':plain('nw.d')});de.value=DRAFT.nd||'';
   ti.addEventListener('input',function(){DRAFT.nt=ti.value;});de.addEventListener('input',function(){DRAFT.nd=de.value;});
